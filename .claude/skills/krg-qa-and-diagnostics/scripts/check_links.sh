@@ -48,10 +48,12 @@ FAIL=0
 echo ""
 printf '%-8s %s\n' "STATUS" "URL"
 while IFS= read -r url; do
-  code=$(curl -sS -o /dev/null -I -L -m 10 -w '%{http_code}' "$url" 2>/dev/null || echo "000")
+  code=$(curl -sS -o /dev/null -I -L -m 10 -w '%{http_code}' "$url" 2>/dev/null) || true
+  code=$(printf '%s' "${code:-000}" | tr -d '[:space:]')
   case "$code" in
     2*|3*) verdict="OK" ;;
     403|405) verdict="WARN (server blocks scripted HEAD requests - verify in a browser)" ;;
+    000) verdict="FAIL (no HTTP response: dead host, timeout, or a proxy/firewall blocked the request)"; FAIL=$((FAIL + 1)) ;;
     *) verdict="FAIL"; FAIL=$((FAIL + 1)) ;;
   esac
   printf '%-8s %s  %s\n' "$code" "$url" "[$verdict]"
