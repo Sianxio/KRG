@@ -145,7 +145,7 @@ Count the remaining placeholders:
 grep -c 'href="#"' index.html guide.html
 ```
 
-Verified baseline: **index.html: 17** (16 Amazon buttons + 1 footer Patreon link), **guide.html: 1** (footer Patreon link). The Etsy buttons in guide.html are a separate placeholder (`https://www.etsy.com/shop/YourShop`, lines 48/210/267) — they *do* navigate, just to nowhere useful. Replacing all of these with real links is the launch-blocking task: → `krg-launch-campaign` (process) and `krg-affiliate-monetization-reference` (link formats).
+Verified baseline: **index.html: 17** (16 Amazon buttons + 1 footer Patreon link), **guide.html: 1** (footer Patreon link) (baseline 2026-07-06 — authoritative source: run `bash .claude/skills/krg-qa-and-diagnostics/scripts/audit_placeholders.sh`). The Etsy buttons in guide.html are a separate placeholder (`https://www.etsy.com/shop/YourShop`, lines 48/210/267) — they *do* navigate, just to nowhere useful. Replacing all of these with real links is the launch-blocking task: → `krg-launch-campaign` (process) and `krg-affiliate-monetization-reference` (link formats).
 
 ## §6 Live site doesn't show my change
 
@@ -173,7 +173,7 @@ Reproduce without a phone: devtools → click the **device toolbar** icon (a pho
 
 ## Latent traps — identified by static audit 2026-07-06, no incident yet
 
-None of these has ever bitten (git history: 3 commits, no reverts). They are wired into the current code and *will* produce confusing symptoms someday:
+None of these has ever bitten (the five site files have not changed since commit `b863b95`, 2026-02-04, no reverts; later commits touch only `.claude/skills/` — verify: `git log --oneline -1 -- index.html guide.html styles.css script.js README.md`). They are wired into the current code and *will* produce confusing symptoms someday:
 
 1. **fadeIn lives inside script.js.** The `@keyframes fadeIn` CSS is injected at runtime by script.js lines 63–76 (`document.createElement('style')`). If script.js fails to load or has a syntax error, the animation definition vanishes *along with* the filters — one root cause, two symptoms. Don't chase them separately; run §1b first.
 2. **Inline `display` styles can override future CSS.** Filtering sets `card.style.display = 'block'` / `'none'` directly on each card (script.js lines 23/27). Inline styles beat stylesheet rules, so if you later restyle `.product-card` with `display: flex` or `grid` in styles.css, cards will look right on page load but **snap back to `block`** the first time anyone clicks a filter. If a card's layout "breaks only after filtering", this is why.
@@ -182,7 +182,7 @@ None of these has ever bitten (git history: 3 commits, no reverts). They are wir
 
 ## Provenance & maintenance
 
-Verified against the working tree on **2026-07-06** (index.html 337 lines, guide.html 303, styles.css 835, script.js 76). Re-verify the load-bearing facts in one pass from the site folder:
+Verified against the working tree on **2026-07-06**; reviewed & corrected 2026-07-07 (index.html 337 lines, guide.html 303, styles.css 835, script.js 76). Re-verify the load-bearing facts in one pass from the site folder:
 
 ```bash
 grep -o 'data-category="[^"]*"' index.html | sort | uniq -c            # expect 8 essential / 4 optional / 4 tools

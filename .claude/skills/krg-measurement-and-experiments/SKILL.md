@@ -89,8 +89,9 @@ data collected by this site: **none**.
 
 Once launched, the only revenue ground truth will be:
 - **Amazon Associates reports** — clicks, ordered items, commissions.
-- **The PDF platform's sales report** — `guide.html` currently points its "Buy
-  Now" buttons at a placeholder Etsy shop URL (`guide.html:48` and `:210`), so
+- **The PDF platform's sales report** — `guide.html` currently points its 3 buy
+  buttons at a placeholder Etsy shop URL (`guide.html:48`, `:210`, and `:267` —
+  locations owned by `krg-content-catalog` §2.3), so
   Etsy's stats would be the source if that platform is kept.
 
 Everything else (page views, CTR, traffic sources) needs installing.
@@ -107,7 +108,9 @@ Everything else (page views, CTR, traffic sources) needs installing.
 **(a) GA4.** The README (lines 115–127) already contains the snippet: add it
 before `</head>` in **both** `index.html` and `guide.html`, replacing
 `YOUR-GA-ID` (both occurrences) with a real measurement ID from a GA4 property
-the owner creates at analytics.google.com. Gives page views, traffic sources,
+the owner creates at analytics.google.com. This is a Class B structural edit —
+classify and gate per `krg-change-control` §3 before deploying (both-pages
+consistency check included). Gives page views, traffic sources,
 and page-to-page flow. Privacy note: analytics cookies may require a consent
 banner depending on visitor jurisdiction (GDPR/ePrivacy) — verify current
 requirements at source before launch; this is a legal question, not a code one.
@@ -247,7 +250,8 @@ placeholder links and produces real traffic.
 
 ## Provenance & maintenance
 
-Written 2026-07-06 against the repo as of that date. Re-verify before trusting:
+Written 2026-07-06 against the repo as of that date; reviewed & corrected
+2026-07-07. Re-verify before trusting:
 
 - Click handler still console-only: `grep -n "console.log" /home/user/KRG/script.js` (expect line ~56 inside the `.btn-affiliate` listener; if it now calls `gtag`, section 2 is stale).
 - No analytics installed: `grep -in "gtag\|googletagmanager\|analytics" /home/user/KRG/index.html /home/user/KRG/guide.html` (any hit = section 2/3 stale, update "Current value" column).

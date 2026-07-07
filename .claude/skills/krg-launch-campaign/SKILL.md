@@ -340,9 +340,12 @@ Closing actions:
 
 ## Provenance & maintenance
 
-Authored **2026-07-06** against the repo at that date (5 files, no build
-system, 3 commits). Every repo command above was executed and verified on
-2026-07-06. External platform statements (Amazon Associates review/closure
+Authored **2026-07-06** against the repo at that date; reviewed & corrected
+2026-07-07 (5 site files, no build system; the site files have not changed
+since commit `b863b95`, 2026-02-04 — later commits touch only
+`.claude/skills/`; verify:
+`git log --oneline -1 -- index.html guide.html styles.css script.js README.md`).
+Every repo command above was executed and verified. External platform statements (Amazon Associates review/closure
 policy, Gumroad/Payhip/Etsy fees and flows) are as-of-knowledge 2026-07 and
 must be re-verified on the platforms' own sites before acting.
 

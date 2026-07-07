@@ -48,16 +48,29 @@ change takes the **strictest** class it touches.
 
 | Class | What it covers | Real examples in this repo | Gate |
 |---|---|---|---|
-| **A — business/legal copy** | Displayed price, guarantee/refund text, the Amazon disclosure block, revenue or social-proof claims, product star ratings | `$7.99` (5 places, see below); "100% Money-back guarantee" (guide.html:51, 270); refund FAQ (guide.html:250-251); "Join hundreds of home cooks" (guide.html:262); disclosure block (index.html:36-38, footer index.html:328); `⭐` ratings on all 16 product cards | Explicit owner approval **before** editing + full pre-deploy checklist (§3). **AI sessions must never change Class A content unprompted** — propose a diff and wait. |
+| **A — business/legal copy** | Displayed price, guarantee/refund text, the Amazon disclosure block, revenue or social-proof claims, product star ratings | `$7.99` (5 places, see below); "100% Money-back guarantee" (guide.html:51, 270) and "100% Satisfaction Guaranteed" (guide.html:211); refund FAQ (guide.html:250-251); "Join hundreds of home cooks" (guide.html:262); disclosure block (index.html:36-40, footer index.html:328); `⭐` ratings on all 16 product cards | Explicit owner approval **before** editing + full pre-deploy checklist (§3). **AI sessions must never change Class A content unprompted** — propose a diff and wait. |
 | **B — structural** | New pages, new/removed product cards, new categories, nav changes, any script.js change | Adding a 17th product card to index.html; adding a `data-category` value (script.js filters on it); changing the nav in either page's `<header>` | Full pre-deploy checklist (§3) + local preview + both-pages consistency check (rule home: `krg-architecture-and-conventions`) |
 | **C — cosmetic** | Colors, spacing, typo fixes in non-legal copy | Editing a CSS custom property in styles.css (~835 lines); fixing a typo in a product description | Local preview + spot-check the changed element on both desktop and narrow width |
 
-**Find every price location** (tested 2026-07-06; expect exactly **5** matches —
+**Find every price location** (tested 2026-07-07; expect exactly **5** matches —
 index.html:172, guide.html:8, 44, 208, 264):
 
 ```bash
 grep -no '\$7\.99' index.html guide.html
 ```
+
+**Canonical all-locations sweep** — the `$`-anchored grep above misses price copies
+that carry no dollar sign (e.g. JSON-LD `"price": 7.99` or OG meta descriptions, if
+those are ever added per krg-growth-frontier). This broader sweep is the authority:
+
+```bash
+grep -rn '7\.99' index.html guide.html    # expect exactly 5 matches today
+```
+
+**When any new copy of the price is added** (metadata, JSON-LD, a new page), register
+it here — update the expected count of BOTH greps and the location list **in the same
+change** that adds it. An unregistered price copy is a stale-price bug waiting for the
+next price change.
 
 ## 2. Non-negotiables and strong defaults
 
@@ -67,7 +80,7 @@ the legally-grounded ones, marked **(legal)**, which are genuinely non-negotiabl
 
 1. **(legal) Keep the Amazon Associates disclosure visible on any page with
    affiliate links.** index.html has 16 Amazon affiliate links and carries the
-   disclosure twice (banner at lines 36-38, footer at line 328). Removing or
+   disclosure twice (banner at lines 36-40, footer at line 328). Removing or
    hiding it risks FTC trouble and Amazon Associates account termination —
    details and exact required wording live in `krg-affiliate-monetization-reference`.
    guide.html currently has no Amazon links, so it needs no Amazon disclosure;
@@ -85,8 +98,11 @@ the legally-grounded ones, marked **(legal)**, which are genuinely non-negotiabl
 
 3. **Change the price in ALL 5 locations or none.** A visitor who sees $7.99 on
    index.html and a different price at guide.html's buy button will assume a
-   scam and leave. Run the grep in §1 before and after any price change; the
-   count must be 0 for the old price and 5 for the new one.
+   scam and leave. Run BOTH greps in §1 (the `$`-anchored one and the canonical
+   `grep -rn '7\.99'` sweep) before and after any price change; the count must
+   be 0 for the old price and match the registered location count (5 today)
+   for the new one. If metadata/JSON-LD price copies have been added, the
+   registered count in §1 must already reflect them.
 
 4. **Both-pages rule for shared chrome** (header, nav, footer, disclosure
    styles): index.html and guide.html are separate files with duplicated
@@ -107,10 +123,12 @@ the legally-grounded ones, marked **(legal)**, which are genuinely non-negotiabl
 
 Run from inside the KRG project folder. Steps 1-3 are commands; 4-8 are eyes-on.
 
-1. **Placeholder/link audit.** The maintained audit scripts live in
-   `krg-qa-and-diagnostics` (invoke per that skill — script paths are its home;
-   as of 2026-07-06 the sibling skill files are still being authored, so the
-   tested inline equivalents are given here). Current baseline counts are in §4:
+1. **Placeholder/link audit.** Run the maintained audit suite per
+   `krg-qa-and-diagnostics` (script paths are its home):
+   `bash .claude/skills/krg-qa-and-diagnostics/scripts/run_all.sh`.
+   The inline greps below are the fallback if the scripts are missing.
+   Current baseline counts are in §4 (baseline 2026-07-06 — authoritative
+   source: run `bash .claude/skills/krg-qa-and-diagnostics/scripts/audit_placeholders.sh`):
 
    ```bash
    grep -n 'href="#"' index.html guide.html | wc -l     # placeholder links (baseline: 18)
@@ -155,8 +173,9 @@ Run from inside the KRG project folder. Steps 1-3 are commands; 4-8 are eyes-on.
 
 ## 4. Open-items ledger
 
-Started **2026-07-06**. No prior incident history exists (3 commits total, all
-2026-02-04, no reverts). Seeded from the 2026-07-06 audit — real findings only.
+Started **2026-07-06**. No prior incident history exists — the five site files
+have not changed since commit `b863b95` (2026-02-04, no reverts); later commits
+touch only `.claude/skills/`. Seeded from the 2026-07-06 audit — real findings only.
 Every evidence command below was run and its count verified on 2026-07-06.
 
 | # | Item | Evidence (run from project folder) | Status | Fixed via |
@@ -165,7 +184,7 @@ Every evidence command below was run and its count verified on 2026-07-06.
 | 2 | 3 "Buy on Etsy" links point at placeholder shop `YourShop` (guide.html:48, 210, 267) | `grep -n 'YourShop' guide.html` → 3 lines | open | `krg-launch-campaign` |
 | 3 | 2 Patreon footer links are `href="#"` (index.html:324, guide.html:290) | `grep -n 'Patreon' index.html guide.html` | open | `krg-launch-campaign` |
 | 4 | Fabricated star ratings on all 16 product cards (e.g. "⭐⭐⭐⭐⭐ (4.8)") — **compliance risk**, not sourced from Amazon | `grep -c 'product-rating' index.html` → 16 | open | `krg-launch-campaign` (policy detail: `krg-affiliate-monetization-reference`) |
-| 5 | Unsubstantiated claims in guide.html: "hundreds of home cooks" (line 262), money-back guarantee (lines 51, 211, 270) and refund FAQ (250-251) with no product sold yet — **compliance risk** | `grep -ni 'hundreds\|guarantee\|refund' guide.html` | open | `krg-launch-campaign` |
+| 5 | Unsubstantiated claims in guide.html: "hundreds of home cooks" (line 262), guarantee claims (money-back: 51, 270; satisfaction: 211) and refund FAQ (250-251) with no product sold yet — **compliance risk** | `grep -ni 'hundreds\|guarantee\|refund' guide.html` | open | `krg-launch-campaign` |
 
 Ledger maintenance: when an item is fixed, change its status to
 `closed YYYY-MM-DD` and note the commit; when a new audit finding appears, add
@@ -190,14 +209,18 @@ a row with a tested evidence command. Never delete rows.
 
 ## Provenance & maintenance
 
-Authored **2026-07-06** against commit `b863b95` (repo state: 5 files, no
-build system). All counts and commands above were executed and verified on
-that date. Volatile facts and their one-line re-verification commands (run
-from the project folder):
+Authored **2026-07-06** against commit `b863b95` (repo state: 5 site files, no
+build system); reviewed & corrected 2026-07-07. All counts and commands above
+were executed and verified. The five site files have not changed since commit
+`b863b95` (2026-02-04); later commits touch only `.claude/skills/` — verify:
+`git log --oneline -1 -- index.html guide.html styles.css script.js README.md`
+(expect `b863b95`). Volatile facts and their one-line re-verification commands
+(run from the project folder):
 
 | Fact (as of 2026-07-06) | Re-verify with |
 |---|---|
 | Price $7.99 in exactly 5 places | `grep -no '\$7\.99' index.html guide.html \| wc -l` |
+| Price digits `7.99` in exactly 5 places (all-locations sweep, catches $-less copies) | `grep -rn '7\.99' index.html guide.html \| wc -l` |
 | 18 `href="#"` placeholders (16 affiliate + 2 Patreon) | `grep -n 'href="#"' index.html guide.html \| wc -l` |
 | 3 `YourShop` Etsy placeholders | `grep -c 'YourShop' guide.html` |
 | 16 product cards with fabricated ratings | `grep -c 'product-rating' index.html` |

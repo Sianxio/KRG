@@ -1,8 +1,9 @@
 ---
 name: krg-content-catalog
 description: >
-  Catalog of every content/configuration axis of the Korean Ramen Guide site and tested
-  checklists for changing each. Load this skill when adding, editing, or removing product
+  Catalog of every content/configuration axis of the Korean Ramen Guide site and
+  checklists for changing each (derived from the shipped markup — see Provenance). Load
+  this skill when adding a new HTML page, or when adding, editing, or removing product
   cards, categories, filter buttons, prices, badges, price ranges, product notes, FAQ items,
   CTAs, buy buttons, value lists, feature cards, preview items, trust badges, nav links,
   footer links, the Patreon link, the disclosure block, section titles, or any page copy on
@@ -16,8 +17,11 @@ description: >
 
 This is the master list of everything editable on the two-page Korean Ramen Guide site,
 its current value, and a step-by-step checklist for each kind of change. All counts and
-line numbers below were verified against the repo on 2026-07-06. **Line numbers drift as
-content is added — always re-run the verification grep given with each table.**
+line numbers below were verified against the repo on 2026-07-06. The checklists are
+**derived from the shipped markup** — the verification greps were run, but the mutation
+procedures themselves have not yet been exercised (the site files are unmodified since
+2026-02-04). **Line numbers drift as content is added — always re-run the verification
+grep given with each table.**
 
 ## When to use / When NOT
 
@@ -93,7 +97,9 @@ star-rating line like `<div class="product-rating">⭐⭐⭐⭐⭐ (4.8)</div>` 
 sign-off — see `krg-change-control`.
 
 **Affiliate links:** all 16 are placeholders:
-`grep -c 'href="#" class="btn btn-primary btn-affiliate"' index.html` → **16**.
+`grep -c 'href="#" class="btn btn-primary btn-affiliate"' index.html` → **16**
+(baseline 2026-07-06 — authoritative source: run
+`bash .claude/skills/krg-qa-and-diagnostics/scripts/audit_placeholders.sh`).
 Real URL format, Amazon tag, and disclosure rules live in `krg-affiliate-monetization-reference`.
 
 ### 2.2 Filter axis — index.html lines 46-49
@@ -159,24 +165,20 @@ Guide active. Verify: `grep -n 'nav-link' index.html guide.html`.
 `<a href="#" target="_blank">Join on Patreon</a>` (index.html:324, guide.html:290 —
 verify: `grep -n 'Patreon' index.html guide.html`). The **Legal section intentionally
 differs**: index.html:328 carries the Amazon Associate line; guide.html:294 carries
-"Refund Policy · Privacy Policy · Terms". After any footer edit, diff them:
-
-```bash
-diff <(sed -n '/<footer>/,/<\/footer>/p' index.html) \
-     <(sed -n '/<footer>/,/<\/footer>/p' guide.html)
-```
-
-Expected output today is exactly one changed line (the Legal `<p class="small">` pair
-above). Any other difference means a footer edit missed one page.
+"Refund Policy · Privacy Policy · Terms". After any footer edit, run the drift diff per
+`krg-architecture-and-conventions` §1 (that skill is the home for the command and the
+expected intentional-difference baseline), or run `check_consistency.sh` from
+`krg-qa-and-diagnostics`. Any difference beyond the intentional one means a footer edit
+missed one page.
 
 **Disclosure block — index.html ONLY** (lines 36-40, `class="disclosure"`, "As an Amazon
 Associate, I earn…"). guide.html has no disclosure block because it has no Amazon links.
 Verify: `grep -n 'class="disclosure"' index.html guide.html` → one hit, index.html:36.
 Disclosure wording is legal copy → Class A (`krg-change-control`).
 
-### 2.5 styles.css tunables — the `:root` palette (lines 13-21)
+### 2.5 styles.css tunables — the `:root` palette (block lines 12–20, variables 13–19)
 
-Verify: `sed -n '13,21p' styles.css`
+Verify: `grep -n ':root' styles.css` (block opens at line 12) and `sed -n '12,20p' styles.css`
 
 | Variable | Value | Drives (main uses) |
 |---|---|---|
@@ -279,9 +281,9 @@ Three touch points, all in index.html, plus the JS contract check:
 1. Chrome exists **verbatim on both pages** — the both-pages rule
    (`krg-architecture-and-conventions` is the authority). Make the identical edit in
    index.html AND guide.html.
-2. Verify with the footer diff from section 2.4 (expect only the one known Legal-line
-   difference) and, for nav: `grep -n 'nav-link' index.html guide.html` — same hrefs/labels,
-   only `active` placement differs.
+2. Verify with the drift diff (home: `krg-architecture-and-conventions` §1 — expect only
+   the one known Legal-line difference) and, for nav: `grep -n 'nav-link' index.html guide.html`
+   — same hrefs/labels, only `active` placement differs.
 3. Replacing the Patreon `href="#"` placeholder: 2 locations
    (`grep -n 'Patreon' index.html guide.html`), same URL in both, keep `target="_blank"`.
 4. Footer legal text (Amazon Associate line, refund/privacy wording) is Class A —
@@ -317,6 +319,30 @@ Three touch points, all in index.html, plus the JS contract check:
    run the step-3.2.5 inverse check to catch buttons with zero cards.
 4. Preview each filter; run audits (`krg-qa-and-diagnostics`); update this skill's tables.
 
+### 3.7 Add a new HTML page (Class B — gate per krg-change-control)
+
+1. **Copy guide.html as the skeleton**: `cp guide.html newpage.html`. Keep the relative
+   asset references exactly as-is — `<link rel="stylesheet" href="styles.css">` and
+   `<script src="script.js"></script>` (relative paths are what keep drag-and-drop
+   deploys and `file://` previews working).
+2. **Write the new page's `<title>` and meta description** per the `krg-docs-and-writing`
+   template (120–155 characters, no Class A claims). Replace the body content; page copy
+   style also per `krg-docs-and-writing`.
+3. **Keep the header/nav and footer chrome verbatim** from the existing pages (only the
+   `nav-link active` placement differs per page). A third page means a THIRD copy of the
+   chrome — every future chrome edit now touches three files (both-pages rule becomes an
+   all-pages rule; home: `krg-architecture-and-conventions` §1).
+4. **Add a nav link to the new page on BOTH existing pages** (both-pages rule) and in the
+   new page's own nav. Verify: `grep -n 'nav-link' *.html` — same link set on every page.
+5. **Extend the consistency check.** `check_consistency.sh` (`krg-qa-and-diagnostics`)
+   today compares only index.html vs guide.html — when a third page lands, extend that
+   script to cover it **in the same change**, or chrome drift on the new page goes
+   undetected.
+6. **Register the page in sitemap.xml when one exists** (per `krg-growth-frontier`
+   Frontier 1) and cross-link it from relevant existing content.
+7. **Preview all pages** (`krg-preview-and-deploy`), then run the audits
+   (`krg-qa-and-diagnostics`). Full pre-deploy checklist per `krg-change-control` §3.
+
 ---
 
 ## 4. Rules of thumb
@@ -331,9 +357,11 @@ Three touch points, all in index.html, plus the JS contract check:
 
 ## 5. Provenance & maintenance
 
-Derived directly from the repo files on **2026-07-06** (index.html 337 lines, guide.html
-303, styles.css 835, script.js 76). Every command above was run and its output checked on
-that date. Line numbers are anchors, not gospel — re-verify each count before relying on it:
+Derived directly from the repo files on **2026-07-06**; reviewed & corrected 2026-07-07
+(index.html 337 lines, guide.html 303, styles.css 835, script.js 76). Every verification
+command above was run and its output checked; the mutation checklists are derived from
+inspection, not yet exercised. Line numbers are anchors, not gospel — re-verify each
+count before relying on it:
 
 | Stated count | Re-verify with (run from /home/user/KRG) |
 |---|---|
@@ -350,7 +378,7 @@ that date. Line numbers are anchors, not gospel — re-verify each count before 
 | 1 trust-badges block (3 spans) | `grep -n -A3 'trust-badges' guide.html` |
 | 2 Patreon placeholders | `grep -n 'Patreon' index.html guide.html` |
 | Disclosure block in index.html only | `grep -n 'class="disclosure"' index.html guide.html` |
-| 7 `:root` palette variables | `sed -n '13,21p' styles.css` |
+| 7 `:root` palette variables (block 12–20, variables 13–19) | `sed -n '12,20p' styles.css` |
 | 3 hard-coded `#B71C1C` gradient stops | `grep -c 'B71C1C' styles.css` |
 
 If any command's output disagrees with a table here, **trust the files** and update this

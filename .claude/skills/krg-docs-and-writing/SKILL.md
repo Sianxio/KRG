@@ -95,7 +95,7 @@ inventing style; the corpus is the authority.
 | Price RANGES, never exact prices, `$lo-hi` no spaces | `$8-15` (index.html:68); exception: the PDF's own fixed price `$7.99` |
 | FAQ: question as `<summary>`, friendly second person, opens with a direct answer word | `Absolutely! If you can measure spices and stir ingredients together, you can make this seasoning blend.` (guide.html:223) |
 | Headings are outcome-phrased, often questions/imperatives | `Ready to Make Your Own Korean Ramen Blend?` (index.html:300) |
-| Sentence length: 1–2 sentences per paragraph; FAQ answers 2–3 short sentences max | guide.html:227 is two sentences totaling 24 words |
+| Sentence length: 1–2 sentences per paragraph; FAQ answers 2–3 short sentences max | guide.html:227 is two sentences totaling 19 words |
 | CTA buttons: verb + object + ` →` | `View on Amazon →` (index.html:70), `Download Complete Recipe Guide →` (index.html:31) |
 
 Jargon defined once: **CTA** = call-to-action, the button/link asking the
@@ -142,7 +142,7 @@ with zero customers is a lie; "Made for home cooks" is not.
 Fill every `{…}`; delete nothing structural. Ratings intentionally absent
 from the product-card template (§2 anti-patterns).
 
-### New product card (index.html pattern, cards at index.html:60-112)
+### New product card (index.html pattern, cards at index.html:60-291; e.g. cards 1–4 at 60–112)
 
 ```html
 <div class="product-card" data-category="{essential|optional|tools}">
@@ -180,7 +180,7 @@ from the product-card template (§2 anti-patterns).
 ```
 
 Pick an emoji not already used as a section marker
-(`grep -o '^## .' README.md` shows the taken set).
+(`grep '^## ' README.md` shows the taken set).
 
 ### New page meta description
 
@@ -222,9 +222,10 @@ what the reader gets, no claims from §3's Class A rows.**
 
 ## Provenance & maintenance
 
-Authored **2026-07-06** against the working tree at commit `f69989f`
-(README.md 226 lines; index.html and guide.html unchanged since audit).
-Every quoted example above was read from the files on that date.
+Authored **2026-07-06**; reviewed & corrected 2026-07-07. Anchor: site files
+at commit `b863b95` (unchanged since 2026-02-04); the skill library itself is
+evolving — see `git log -- .claude/skills` (README.md 226 lines). Every quoted
+example above was read from the files.
 Re-verify from the project folder:
 
 | Fact (as of 2026-07-06) | Re-verify with |

@@ -51,8 +51,8 @@ Jargon, defined once:
 
 All scripts live in `.claude/skills/krg-qa-and-diagnostics/scripts/`, are
 executable, run from ANY directory (they locate the repo root themselves), and
-use only bash + grep/sed/awk + python3 stdlib — nothing to install. They work on
-macOS and Linux.
+use only bash + grep/sed/awk + python3 stdlib (plus curl for `check_links.sh --online`)
+— nothing to install. They work on macOS and Linux.
 
 Run everything:
 
@@ -146,9 +146,9 @@ A report without the OUTPUT line is an opinion, not a result.
 
 ## Provenance & maintenance
 
-Facts in this file verified against the repo on **2026-07-06** (scripts executed
-2026-07-07 UTC in a sandboxed environment; the `000` proxy behavior in
-`check_links.sh --online` was observed there).
+Facts in this file verified against the repo on **2026-07-06**; reviewed &
+corrected 2026-07-07 (scripts executed 2026-07-07 UTC in a sandboxed environment;
+the `000` proxy behavior in `check_links.sh --online` was observed there).
 
 Re-verify any of this in one line each:
 

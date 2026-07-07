@@ -6,8 +6,8 @@ description: >
   how the 4 site files fit together, the "both-pages rule" for copy-pasted header/footer chrome,
   the HTML-attribute contract that script.js depends on (data-filter / data-category /
   .btn-affiliate), the CSS color palette and breakpoints, the invariants every change must
-  preserve, and the known weak points. Load it BEFORE any HTML/CSS/JS edit, before adding a
-  product card or page, or when answering "how does this site work?". Do NOT load it for:
+  preserve, and the known weak points. Load it BEFORE any structural HTML/CSS/JS edit or
+  when answering "how does this site work?". Do NOT load it for:
   deciding whether a change is allowed (krg-change-control), diagnosing a broken page symptom
   (krg-debugging-playbook), previewing or deploying (krg-preview-and-deploy), product/copy
   content details (krg-content-catalog), Amazon/Etsy/FTC rules (krg-affiliate-monetization-reference),
@@ -39,6 +39,7 @@ copy-paste the command. All commands are read-only; none of them change any file
 | "The page looks broken / a button stopped working" | `krg-debugging-playbook` |
 | "How do I preview locally or deploy to Netlify?" | `krg-preview-and-deploy` |
 | "What products/copy exist? How do I add a product correctly?" | `krg-content-catalog` |
+| "How do I add a new HTML page?" | `krg-content-catalog` §3.7 (Add a new HTML page) |
 | "Amazon Associates / Etsy / FTC disclosure rules" | `krg-affiliate-monetization-reference` |
 | "How do I prove a change works? Audit scripts?" | `krg-qa-and-diagnostics` |
 | "What should we build next for revenue?" | `krg-growth-frontier` |
@@ -85,6 +86,10 @@ diff <(sed -n '/<footer>/,/<\/footer>/p' index.html) <(sed -n '/<footer>/,/<\/fo
 ```
 
 Any output beyond the two intentional differences means drift — fix it in both files.
+The same baseline is also encoded in `check_consistency.sh` (`krg-qa-and-diagnostics`);
+if the intentional differences ever change deliberately, update that script AND this
+section in the same change. Note: the script compares only index.html vs guide.html
+today — extend it when a third page is added (see `krg-content-catalog` §3.7).
 
 ## 2. The HTML↔JS contract
 
@@ -116,7 +121,7 @@ If the HTML stops matching these exact names, features break with no error messa
 
    A card with a typo'd or missing `data-category` shows under "All Products" but vanishes
    under every specific filter.
-3. **`.btn-affiliate` is the click-logging hook.** script.js lines 52–58 attach a listener to
+3. **`.btn-affiliate` is the click-logging hook.** script.js lines 52–59 attach a listener to
    every element with that class and log the product name to the browser console:
 
    ```js
@@ -132,7 +137,7 @@ If the HTML stops matching these exact names, features break with no error messa
    clicking throws a JavaScript error. Keep the class if you want click logging; this is the
    place where real analytics would plug in later.
 4. **Smooth scroll** intercepts only links whose `href` starts with `#` and is not the bare
-   `"#"` (script.js lines 35–48):
+   `"#"` (script.js lines 35–49):
 
    ```js
    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -232,8 +237,9 @@ grep -n 'stylesheet\|script src' index.html guide.html        # 2 hits per file
    `⭐⭐⭐⭐⭐ (4.8)` (`.product-rating`, 16 occurrences) that are not real Amazon data. Same
    family of problems: guide.html's "Join hundreds of home cooks" (line 262), money-back
    guarantee claims (lines 51, 270), and "100% Satisfaction Guaranteed" (line 211) are
-   unsubstantiated. Do not copy this pattern into
-   new cards or pages. Compliance details and remediation live in
+   unsubstantiated (baseline 2026-07-06 — status home: `krg-change-control` §4 ledger;
+   full inventory: `krg-affiliate-monetization-reference` §7). Do not copy this pattern
+   into new cards or pages. Compliance details and remediation live in
    `krg-affiliate-monetization-reference`.
 3. **script.js injects a `<style>` element at runtime** (lines 63–76) to define the `fadeIn`
    animation. That keyframe is invisible in styles.css — if you search the stylesheet for
@@ -245,14 +251,18 @@ grep -n 'stylesheet\|script src' index.html guide.html        # 2 hits per file
    the first filter click snaps them back to `block` and breaks the card's internal layout.
    Keep card-internal layout on child elements, or fix the JS first.
 5. **Monetization placeholders.** 16 Amazon buttons and 2 Patreon links are `href="#"`;
-   3 Etsy links point at `https://www.etsy.com/shop/YourShop`. The site cannot earn until
+   3 Etsy links point at `https://www.etsy.com/shop/YourShop` (baseline 2026-07-06 —
+   authoritative source: run
+   `bash .claude/skills/krg-qa-and-diagnostics/scripts/audit_placeholders.sh`).
+   The site cannot earn until
    these are real (the campaign to fix this lives in `krg-launch-campaign`). Listed here so
    nobody "fixes" a `#` link by deleting it.
 
 ## 6. Design decisions and why
 
-These rationales are **inference** — the repo has no design docs and only three commits, all
-from 2026-02-04, so intent is read from the artifacts (and matches the README's deploy manual):
+These rationales are **inference** — the repo has no design docs, and the site files carry
+only three commits (all 2026-02-04; later commits touch only `.claude/skills/`), so intent
+is read from the artifacts (and matches the README's deploy manual):
 
 - **Zero-build static site** (inference, strongly supported by the README): keeps deployment
   literally drag-and-drop into Netlify, which a non-technical owner can do without a terminal.
@@ -272,10 +282,12 @@ from 2026-02-04, so intent is read from the artifacts (and matches the README's 
 
 ## Provenance & maintenance
 
-Verified against `/home/user/KRG` on **2026-07-06** (git HEAD `b863b95`, 3 commits total,
-no other work branches). Every command below was actually run on that date from inside the
-KRG folder and produced the stated results. If any re-check disagrees with this file,
-trust the repo and update this file.
+Verified against `/home/user/KRG` on **2026-07-06**; reviewed & corrected 2026-07-07.
+The five site files have not changed since commit `b863b95` (2026-02-04); later commits
+touch only `.claude/skills/`. No abandoned work branches; the `claude/*` branch carries
+only the skill library. Every command below was actually run from inside the KRG folder
+and produced the stated results. If any re-check disagrees with this file, trust the
+repo and update this file.
 
 | Fact | Re-verify with (run inside the KRG folder) |
 |---|---|
@@ -293,4 +305,4 @@ trust the repo and update this file.
 | Runtime style injection & inline display toggling | `grep -n "createElement('style')\|style.display" script.js` |
 | 16 fabricated ratings; "Join hundreds"; guarantee claims | `grep -c 'product-rating' index.html; grep -n 'Join hundreds\|Money-back\|money-back' guide.html` |
 | Disclosure banner on index only | `grep -n 'Amazon Associate' index.html guide.html` |
-| Git history (3 commits, all 2026-02-04) | `git log --oneline --format='%h %ad %s' --date=short` |
+| Site files unchanged since `b863b95` (2026-02-04) | `git log --oneline -1 -- index.html guide.html styles.css script.js README.md` (expect `b863b95`) |

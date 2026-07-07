@@ -33,8 +33,8 @@ This site is **5 plain files** at the repo root: `index.html`, `guide.html`, `st
 
 Jargon, one sentence each:
 - **Git** — a program that tracks every saved version of your files so you can go back in time.
-- **GitHub** — a website (github.com) that stores your git history online; this project lives at repo `sianxio/krg`.
-- **Netlify** — a hosting service that takes your files and serves them to the world as a website, free for sites like this.
+- **GitHub** — a website (github.com) that stores your git history online; this project's canonical home is `github.com/Sianxio/KRG` per the session record (recorded, not verified from this environment).
+- **Netlify** — a hosting service that takes your files and serves them to the world as a website; historically its free tier covers sites like this — verify current plans on netlify.com.
 - **localhost** — a web address (`http://localhost:8000`) that points at your own computer, so only you can see it.
 
 Environment from scratch = a browser. Optionally git (to get/update code) and python3 (for a nicer local preview). That's the whole setup.
@@ -54,19 +54,18 @@ To stop the server: press **Ctrl+C** in the terminal window where it is running.
 
 ## 3. Getting the code (git one-liners)
 
-Find your repo URL (this prints where "origin" — your GitHub copy — lives):
+Find your repo URL (this prints where "origin" — your git remote — lives):
 ```bash
 git remote -v
 ```
-Expected shape of the output:
-```
-origin  https://github.com/sianxio/krg.git (fetch)
-origin  https://github.com/sianxio/krg.git (push)
-```
+**Your checkout's URL may differ** (mirrors and proxies exist — e.g. AI/sandbox sessions
+see a local proxy URL) — run `git remote -v` and use whatever IT prints. The canonical
+repo is `github.com/Sianxio/KRG` per the session record (recorded, not verified from
+this environment — confirm at github.com before relying on it for recovery).
 
-- **First time on a new computer** — download a full copy:
+- **First time on a new computer** — download a full copy from the canonical repo:
   ```bash
-  git clone https://github.com/sianxio/krg.git KRG
+  git clone https://github.com/Sianxio/KRG.git KRG
   ```
   (`git clone <url>` copies the whole project and its history into a new folder.)
 - **Already have the folder** — pull the latest changes:
@@ -78,6 +77,11 @@ origin  https://github.com/sianxio/krg.git (push)
 For committing/pushing changes, follow the gates in **krg-change-control** — that skill owns the pre-deploy checklist; don't improvise one here.
 
 ## 4. Deploying to Netlify — the two README-documented paths
+
+**Before ANY deploy (either path below): complete the krg-change-control pre-deploy
+checklist (includes running the QA suite).** That checklist is the gate; this skill is
+only the mechanics — drag-and-drop involves no commit/push, so nothing else stops an
+ungated deploy.
 
 There is **no `netlify.toml` or any Netlify config file in the repo** (verified 2026-07-06) — Netlify needs zero configuration for this site: build command = **none**, publish directory = **repo root**.
 
@@ -91,7 +95,7 @@ Repeat the same drag to publish updates — each drag is a new deploy.
 ### Path B: GitHub-connected auto-deploy (UI flow — as documented in README / Netlify docs, verify on site)
 One-time setup: app.netlify.com → "New site from Git" → choose GitHub → select the `sianxio/krg` repository → leave build command **empty** and publish directory as the **root** → "Deploy site".
 
-After setup, every push to the `main` branch deploys automatically — no Netlify visit needed. Deploys take well under a minute for a site this small.
+After setup, every push to the `main` branch deploys automatically — no Netlify visit needed. Deploys are typically fast (historically well under a minute for a site this small — verify in the Netlify deploy log).
 
 ## 5. Verifying a deploy actually went live
 
@@ -113,6 +117,8 @@ Also spot-check monetization state on the live page (placeholder Amazon links ar
 ```bash
 curl -s https://YOUR-SITE.netlify.app/ | grep -c 'href="#"'
 # 17 today (16 product buttons + footer Patreon placeholder); should trend to 0 before launch
+# (baseline 2026-07-06 — authoritative source: run
+#  bash .claude/skills/krg-qa-and-diagnostics/scripts/audit_placeholders.sh)
 ```
 
 ## 6. Rollback (undoing a bad deploy)
@@ -133,14 +139,14 @@ Nothing. No build artifacts, no generated files, no databases, no server logs on
 
 ## 9. From-scratch disaster recovery checklist
 
-- [ ] **Laptop/repo lost?** The code is safe on GitHub. `git clone https://github.com/sianxio/krg.git` on any machine (Section 3) and you're back.
-- [ ] **Netlify account lost?** Make a new free account and drag-and-drop the folder (Section 4A) — live again in minutes. Re-add the custom domain (Section 7) if you had one.
+- [ ] **Laptop/repo lost?** The code is safe on GitHub (canonical home `github.com/Sianxio/KRG` per the session record — recorded, not verified; confirm at github.com). `git clone https://github.com/Sianxio/KRG.git` on any machine (Section 3) and you're back. Before redeploying the recovered copy, run the krg-change-control pre-deploy checklist as with any deploy.
+- [ ] **Netlify account lost?** Make a new free account and drag-and-drop the folder (Section 4A, including its pre-deploy gate) — typically live again in minutes. Re-add the custom domain (Section 7) if you had one.
 - [ ] **Both lost but you have the 5 files anywhere** (old download, email attachment)? Drag-and-drop those 5 files' folder to Netlify — the repo is the deployable artifact, so any complete copy of it is a full backup.
 - [ ] **GitHub account lost AND no local copy?** Only then is code gone — this is why Path B (GitHub-connected) plus an occasional local `git pull` is the resilient setup.
 
 ## Provenance & maintenance
 
-Verified 2026-07-06 against repo state (3 commits on `main`, remote `sianxio/krg`; local server test with python3 3.11 returned HTTP 200 for `/`, `/guide.html`, `/styles.css`). Netlify UI flows are from README.md and were not executable here — re-verify on app.netlify.com. Re-verification one-liners:
+Verified 2026-07-06 against repo state; reviewed & corrected 2026-07-07. The five site files have not changed since commit `b863b95` (2026-02-04, 3 commits on `main`); later commits touch only `.claude/skills/`. The canonical GitHub home `Sianxio/KRG` is from the session record, not verified from this environment (`git remote -v` here prints a sandbox proxy URL). Local server test with python3 3.11 returned HTTP 200 for `/`, `/guide.html`, `/styles.css`. Netlify UI flows are from README.md and were not executable here — re-verify on app.netlify.com. Re-verification one-liners:
 
 ```bash
 ls /home/user/KRG                                   # still exactly 5 root files?

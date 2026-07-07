@@ -69,7 +69,9 @@ https://www.amazon.com/dp/B01N5PWDSO/?tag=yourtag-20
   link without it earns nothing.
 - Current state [REPO]: all 16 product links are `href="#"` placeholders.
   Verify: `grep -c 'btn-affiliate' index.html` → 16 anchors, all `href="#"`
-  (index.html lines 70–289). Not one real URL exists yet.
+  (index.html lines 70–289; baseline 2026-07-06 — authoritative source: run
+  `bash .claude/skills/krg-qa-and-diagnostics/scripts/audit_placeholders.sh`).
+  Not one real URL exists yet.
 
 ### The disclosure sentence (already present)
 
@@ -180,7 +182,7 @@ Honest assessment of THIS site today [REPO]:
 | Page | State | Verdict |
 |---|---|---|
 | index.html | Disclosure banner at line 38, directly below the hero and ABOVE all 16 affiliate links, plus a footer repeat at line 328 | Good — placement is before the links, not footer-only |
-| guide.html | Contains NO affiliate links and NO Amazon content (`grep -in "amazon\|btn-affiliate" guide.html` → no hits) | No affiliate disclosure needed on this page |
+| guide.html | Contains NO affiliate links (`grep -c 'btn-affiliate' guide.html` → 0 and `grep -c 'href="https://www.amazon' guide.html` → 0). One editorial Amazon *mention* at line 227 — FAQ text "…we provide a complete Amazon shopping list for easy ordering." — which is not a link and triggers no disclosure requirement | No affiliate disclosure needed on this page |
 
 Keep it this way: if affiliate links are ever added to guide.html or any new
 page, that page needs its own near-the-links disclosure. Any edit to disclosure
@@ -194,6 +196,9 @@ proof also risks the Amazon account (section 2). One home per fact: the FIX
 procedure for every row lives in krg-launch-campaign; this table defines WHY
 each item is a problem. All repo locations verified 2026-07-06.
 
+(Baseline 2026-07-06; live status of each row is tracked in the
+`krg-change-control` §4 open-items ledger.)
+
 | Claim in copy | Where [REPO] | Why it's a problem | Status |
 |---|---|---|---|
 | `⭐⭐⭐⭐⭐ (4.8)` etc., ×16 | index.html product cards (`grep -n "product-rating" index.html`) | Fabricated — not from Amazon; violates Associates rules AND is deceptive social proof | **OPEN — must fix before Associates application** |
@@ -205,8 +210,9 @@ each item is a problem. All repo locations verified 2026-07-06.
 
 ## Provenance & maintenance
 
-- Authored 2026-07-06 against repo state at that date (all [REPO] line numbers
-  from that snapshot; re-run the greps rather than trusting line numbers).
+- Authored 2026-07-06 against repo state at that date; reviewed & corrected
+  2026-07-07 (all [REPO] line numbers from that snapshot; re-run the greps
+  rather than trusting line numbers).
 - Re-verify repo facts with:
   - `grep -c 'btn-affiliate' index.html` (16 affiliate anchors, all `href="#"`)
   - `grep -n "product-rating" index.html` (16 fabricated rating lines)
@@ -214,7 +220,10 @@ each item is a problem. All repo locations verified 2026-07-06.
   - `grep -c 'rel="nofollow"' index.html` (16; no `sponsored` yet)
   - `grep -n "YourShop" guide.html` (3 Etsy placeholders)
   - `grep -n "Join on Patreon" *.html` (2 `href="#"` placeholders)
-  - `grep -in "amazon" guide.html` (should stay empty of affiliate content)
+  - `grep -c 'btn-affiliate' guide.html` → 0 and
+    `grep -c 'href="https://www.amazon' guide.html` → 0 (guide.html must stay
+    free of affiliate links; the harmless text mention of Amazon at line 227
+    is expected)
 - Re-verify external claims (all labeled [EXTERNAL], knowledge as of 2026-07):
   - Re-check Amazon Associates Program Policies + Operating Agreement at
     https://affiliate-program.amazon.com (cookie window, new-account sales

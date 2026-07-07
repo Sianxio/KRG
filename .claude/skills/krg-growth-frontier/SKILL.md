@@ -93,7 +93,7 @@ shareable; Pinterest/Instagram is named as a target channel in README's own stra
 
 **(c) First three steps.**
 1. Add the README's OG/Twitter block (README.md lines 158–168) into `<head>` of index.html (before `</head>`, line 10), rewriting content per page — index gets shopping-list copy, per **krg-docs-and-writing**.
-2. Repeat for guide.html `<head>` (before `</head>`, line 10) with PDF-guide copy including the $7.99 offer.
+2. Repeat for guide.html `<head>` (before `</head>`, line 10) with PDF-guide copy including the $7.99 offer. **Class A-adjacent:** an OG description containing the price is a NEW copy of the displayed price — in the same change, register it in krg-change-control's price-location rule (its all-locations sweep `grep -rn '7\.99' index.html guide.html`) and update that rule's expected count.
 3. Create a real 1200×630 `og:image` (e.g. `/home/user/KRG/preview.jpg`) — the README snippet references a placeholder image URL that does not exist; an OG block pointing at a 404 image fails validators.
 
 **(d) Milestone.** Result when a card validator (e.g. opengraph.xyz or the platform's own
@@ -102,7 +102,8 @@ correct title, description, and image: **2/2 pages pass**, 0 warnings on require
 (data source: validator output screenshot).
 
 **(e) Effort/priority.** ~1–2 hours incl. image; **second**. Depends on: Frontier 1 canonical
-URL decision. Class B head edits per krg-change-control.
+URL decision. Class B head edits per krg-change-control; any tag embedding the price is
+Class A-adjacent (see step 2).
 
 ---
 
@@ -122,7 +123,7 @@ guidance before promising anything).
 
 **(c) First three steps.**
 1. Add a `<script type="application/ld+json">` FAQPage block to guide.html `<head>` (before `</head>`, line 10), with mainEntity built from the exact 8 question/answer pairs at lines 221–252 — text must match visible content.
-2. Add a Product + Offer block (name, `price: 7.99`, `priceCurrency: USD`) to guide.html head, sourcing copy from the price container at lines 42–48.
+2. Add a Product + Offer block (name, `price: 7.99`, `priceCurrency: USD`) to guide.html head, sourcing copy from the price container at lines 42–48. **Class A-adjacent:** JSON-LD `"price": 7.99` is a NEW copy of the displayed price with no `$`, so the `\$7\.99` grep never sees it — in the same change, register it in krg-change-control's price-location rule (the `grep -rn '7\.99' index.html guide.html` sweep catches it) and update that rule's expected count.
 3. Add an ItemList block to index.html head enumerating the 16 product-card names in page order (cards use `product-price` divs; see krg-content-catalog for card anatomy).
 
 **(d) Milestone.** Result when Google's Rich Results Test / Schema.org validator reports
@@ -149,7 +150,7 @@ static-site generator casually; that is a separate, explicit decision).
 
 **(c) First three steps.**
 1. Pick one long-tail topic with clear purchase intent (candidate: "gochugaru substitutes") and draft per **krg-docs-and-writing**.
-2. Create `/home/user/KRG/gochugaru-substitutes.html` by copying guide.html's skeleton (head lines 1–10, header/nav lines 12–24, footer) and following page-addition mechanics in **krg-content-catalog**; include head tags from Frontiers 1–3.
+2. Create `/home/user/KRG/gochugaru-substitutes.html` by copying guide.html's skeleton (head lines 1–10, header/nav lines 12–24, footer) and following the **"Add a new HTML page" checklist in krg-content-catalog §3.7**; include head tags from Frontiers 1–3.
 3. Cross-link: add the new page to sitemap.xml, link to it from an index.html section, and link from the article body back to relevant index.html product cards and the guide.html CTA.
 
 **(d) Milestone.** Result when the new page records its **first organic impression, then
@@ -181,7 +182,7 @@ mini-list from the paid guide. Email owns the audience independent of SERP volat
 | 3 | ConvertKit (Kit) embed | Mature automation | Embed script = external JS; heavier than needed now |
 
 **(c) First three steps.**
-1. Add a plain HTML `<form>` (name, email, submit) above the footer of index.html (footer region after the final CTA box at lines 169–173 / end of cards) using Netlify Forms attributes — no JS required.
+1. Add a plain HTML `<form>` (name, email, submit) above the footer of index.html — after the final CTA section (`<section class="final-cta">`, lines 298–310), before `<footer>`. (Note: lines 169–174 are the *mid-page* `.cta-box`, not the final CTA.) Use Netlify Forms attributes — no JS required.
 2. Add the same form to guide.html near the after-purchase note (line 273) framed as "not ready to buy? get the free mini-list".
 3. Wire the thank-you: a `/home/user/KRG/thanks.html` page (added to sitemap) or Netlify's default success screen; deliver the lead magnet from it.
 
@@ -242,7 +243,8 @@ with owner sign-off and evidence from krg-measurement-and-experiments.
 
 ## Provenance & maintenance
 
-Authored 2026-07-06 against the repo state below. Before acting on ANY frontier, re-verify
+Authored 2026-07-06 against the repo state below; reviewed & corrected 2026-07-07.
+Before acting on ANY frontier, re-verify
 its gap claim — one command each:
 
 | Claim | Re-verify with |
@@ -260,7 +262,8 @@ its gap claim — one command each:
 | Only two HTML pages | `ls /home/user/KRG/*.html` |
 
 Line numbers cited (index.html `</head>` line 10; guide.html FAQ 221–252, Buy buttons
-48/210/267, price 42–48/263–267; index.html CTA 169–173; script.js 56; README 158–184)
-were verified 2026-07-06 — re-check with `grep -n` before editing, and update this file
+48/210/267, price 42–48/263–267; index.html mid-page CTA box 169–174, final CTA section
+298–310; script.js 56; README 158–184)
+were verified 2026-07-07 — re-check with `grep -n` before editing, and update this file
 when they drift. External SEO/marketing claims: as of author's knowledge 2026-07; verify
 current guidance.
