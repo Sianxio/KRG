@@ -145,7 +145,7 @@ from the product-card template (§2 anti-patterns).
 ### New product card (index.html pattern, cards at index.html:60-112)
 
 ```html
-<div class="product-card" data-category="{essential|premium|tools}">
+<div class="product-card" data-category="{essential|optional|tools}">
     <div class="product-image">
         <div class="placeholder-img">{emoji}</div>
     </div>
@@ -184,8 +184,9 @@ Pick an emoji not already used as a section marker
 
 ### New page meta description
 
-Model on the two shipped ones — index.html:6 (137 chars) and guide.html:6
-(150 chars). Format: **120–155 characters, two sentences: what the page is +
+Model on the two shipped ones — index.html:6 (133-char content) and
+guide.html:6 (141-char content). Format: **120–155 characters, two sentences:
+what the page is +
 what the reader gets, no claims from §3's Class A rows.**
 
 ```html
@@ -222,15 +223,15 @@ what the reader gets, no claims from §3's Class A rows.**
 ## Provenance & maintenance
 
 Authored **2026-07-06** against the working tree at commit `f69989f`
-(README.md 224 lines; index.html and guide.html unchanged since audit).
+(README.md 226 lines; index.html and guide.html unchanged since audit).
 Every quoted example above was read from the files on that date.
 Re-verify from the project folder:
 
 | Fact (as of 2026-07-06) | Re-verify with |
 |---|---|
-| README section map (10 H2s, emoji-led) | `grep -c '^## ' README.md` → 10; `grep '^## ' README.md` |
+| README section map (11 H2s, emoji-led) | `grep -c '^## ' README.md` → 11; `grep '^## ' README.md` |
 | "umami secret weapon" desc at index.html:107 | `grep -n 'umami secret weapon' index.html` |
-| "Try:" brand notes present (14 cards) | `grep -c 'product-note">Try:' index.html` |
+| "Try:" brand notes on 12 of 16 cards | `grep -c 'product-note">Try:' index.html` → 12 |
 | Price ranges `$lo-hi` on cards | `grep -no 'product-price">\$[0-9]*-[0-9]*' index.html \| head -3` |
 | Fabricated ratings still present (anti-pattern live) | `grep -c 'product-rating' index.html` → 16 |
 | "Join hundreds" still unfixed | `grep -n 'Join hundreds' guide.html` |
