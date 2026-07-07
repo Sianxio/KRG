@@ -89,29 +89,30 @@ inventing style; the corpus is the authority.
 | Emoji-led README H2s: emoji + space + title | `## 🚀 Deploy to Netlify` (README.md:13) |
 | ✓ checkmark value lists for benefits | `✓ Exact recipe with precise measurements` (guide.html:34) |
 | ✓ items joined with ` · ` when inline | `✓ Curated Amazon links · ✓ Trusted brands · ✓ Best prices` (index.html:30) |
-| Benefit first, mechanism after a spaced hyphen | `The umami secret weapon - optional but highly recommended` (index.html:107) |
-| Product descs: one line, no period, ~6–10 words | `Essential aromatic base for depth and complexity` (index.html:80) |
-| Brand suggestions as a "Try:" note, 2–3 brands, Oxford "or" | `Try: Taekyung, Mother-In-Law's, or The Spice Way` (index.html:71) |
+| Benefit first, mechanism after a spaced hyphen | `The umami secret weapon - optional but highly recommended` (index.html:104) |
+| Product descs: one line, no period, ~6–10 words | `Essential aromatic base for depth and complexity` (index.html:79) |
+| Brand suggestions as a "Try:" note, 2–3 brands, Oxford "or" | `Try: Taekyung, Mother-In-Law's, or The Spice Way` (index.html:70) |
 | Price RANGES, never exact prices, `$lo-hi` no spaces | `$8-15` (index.html:68); exception: the PDF's own fixed price `$7.99` |
 | FAQ: question as `<summary>`, friendly second person, opens with a direct answer word | `Absolutely! If you can measure spices and stir ingredients together, you can make this seasoning blend.` (guide.html:223) |
-| Headings are outcome-phrased, often questions/imperatives | `Ready to Make Your Own Korean Ramen Blend?` (index.html:300) |
+| Headings are outcome-phrased, often questions/imperatives | `Ready to Make Your Own Korean Ramen Blend?` (index.html:284) |
 | Sentence length: 1–2 sentences per paragraph; FAQ answers 2–3 short sentences max | guide.html:227 is two sentences totaling 19 words |
-| CTA buttons: verb + object + ` →` | `View on Amazon →` (index.html:70), `Download Complete Recipe Guide →` (index.html:31) |
+| CTA buttons: verb + object + ` →` | `View on Amazon →` (index.html:69), `Download Complete Recipe Guide →` (index.html:31) |
 
 Jargon defined once: **CTA** = call-to-action, the button/link asking the
 reader to act. **Meta description** = the `<meta name="description">` snippet
 search engines show under the page title.
 
-### Anti-patterns — present in the corpus, do NOT propagate
+### Anti-patterns — fixed 2026-07-07, do NOT reintroduce
 
-These exist in shipped files as open defects (see krg-change-control ledger).
-Match the good patterns above; never copy these into new writing:
+These existed in the shipped files until the owner-approved 2026-07-07 cleanup
+(krg-change-control ledger items 4-5). Match the good patterns above; never
+write these patterns again:
 
-| Anti-pattern | Where it lives today | Why banned |
+| Anti-pattern | History | Why banned |
 |---|---|---|
-| Fake specificity: invented star ratings | `⭐⭐⭐⭐⭐ (4.8)` (index.html:69) — no data source exists | Fabricated numbers destroy trust and violate claims discipline (§3) |
-| Unverifiable social proof | `Join hundreds of home cooks` (guide.html:262) — no customer count exists | Only real counts may be published (§3) |
-| Platform-dependent promises stated as house guarantees | `✓ 100% Money-back guarantee` / `✓ Delivered in 2 minutes` (guide.html:51-52) | Depends on the (not yet chosen) sales platform; Class A |
+| Fake specificity: invented star ratings | `⭐⭐⭐⭐⭐ (4.8)` on all 16 cards — fixed 2026-07-07 (lines deleted; no data source existed) | Fabricated numbers destroy trust and violate claims discipline (§3) |
+| Unverifiable social proof | `Join hundreds of home cooks` — fixed 2026-07-07 (now "Make authentic … in your own kitchen", guide.html:262) | Only real counts may be published (§3) |
+| Platform-dependent promises stated as house guarantees | `✓ 100% Money-back guarantee` / `✓ Delivered in 2 minutes` — fixed 2026-07-07 (now "Digital PDF download" / "One-time purchase", guide.html:51-52) | Depends on the (not yet chosen) sales platform; Class A |
 
 ---
 
@@ -126,8 +127,8 @@ krg-affiliate-monetization-reference.
 |---|---|---|
 | Performance/income ("earn $X/month") | Never publish projections as results. README's `~$200-240/month` (README.md:204) is a hypothetical model built on assumed rates; any public reuse must be labeled "illustrative example, not typical results" | A |
 | Social proof ("hundreds of home cooks", review counts) | A real, current count from an owned data source. No source → no number. "X% of readers…" requires data per krg-measurement-and-experiments | A |
-| Guarantees ("money-back", "delivered in 2 minutes") | The chosen sales platform (or the owner personally) demonstrably honors it, with terms written down. The existing 30-day refund FAQ (guide.html:251) must match whatever the platform actually does | A |
-| Ratings/scores | Only from a real rating system with real submissions. The current `(4.8)` values are fabricated — remove or replace, never extend | A |
+| Guarantees ("money-back", "delivered in 2 minutes") | The chosen sales platform (or the owner personally) demonstrably honors it, with terms written down. The refund FAQ (guide.html:251) defers to the platform's policy since 2026-07-07 — keep it that way until a platform is chosen and verified | A |
+| Ratings/scores | Only from a real rating system with real submissions. The fabricated `(4.8)` values were removed 2026-07-07 — never reintroduce without a real source | A |
 | Product claims ("authentic", "tested variations") | "Tested" only if the owner actually made and tasted it; "authentic" only for genuinely Korean products — hedge as "Korean-style" otherwise (the site already does: index.html:29) | B |
 | Superlatives ("best prices", "secret weapon") | Budget: at most one per section, and only puffery a reasonable reader won't fact-check. "Best prices" (index.html:30) is at the edge — do not add "cheapest", "#1", "guaranteed lowest" | B |
 | Factual product info (shelf life, MSG safety) | A checkable source; keep ranges honest (`3-4 months`, guide.html:243) | C |
@@ -142,7 +143,7 @@ with zero customers is a lie; "Made for home cooks" is not.
 Fill every `{…}`; delete nothing structural. Ratings intentionally absent
 from the product-card template (§2 anti-patterns).
 
-### New product card (index.html pattern, cards at index.html:60-291; e.g. cards 1–4 at 60–112)
+### New product card (index.html pattern, cards at index.html:60-275; e.g. cards 1–4 at 60–108)
 
 ```html
 <div class="product-card" data-category="{essential|optional|tools}">
@@ -231,16 +232,16 @@ Re-verify from the project folder:
 | Fact (as of 2026-07-06) | Re-verify with |
 |---|---|
 | README section map (11 H2s, emoji-led) | `grep -c '^## ' README.md` → 11; `grep '^## ' README.md` |
-| "umami secret weapon" desc at index.html:107 | `grep -n 'umami secret weapon' index.html` |
+| "umami secret weapon" desc at index.html:104 | `grep -n 'umami secret weapon' index.html` |
 | "Try:" brand notes on 12 of 16 cards | `grep -c 'product-note">Try:' index.html` → 12 |
 | Price ranges `$lo-hi` on cards | `grep -no 'product-price">\$[0-9]*-[0-9]*' index.html \| head -3` |
-| Fabricated ratings still present (anti-pattern live) | `grep -c 'product-rating' index.html` → 16 |
-| "Join hundreds" still unfixed | `grep -n 'Join hundreds' guide.html` |
-| Guarantee/delivery claims still unfixed | `grep -n 'Money-back guarantee\|Delivered in 2 minutes' guide.html` |
+| Fabricated ratings removed (fixed 2026-07-07) | `grep -c 'product-rating' index.html` → 0 |
+| "Join hundreds" fixed 2026-07-07 | `grep -c 'Join hundreds' guide.html` → 0 |
+| Guarantee/delivery claims fixed 2026-07-07 | `grep -c 'Money-back guarantee\|Delivered in 2 minutes' guide.html` → 0 |
 | Revenue model figure unchanged | `grep -n '200-240/month' README.md` |
 | Meta description lengths 120–155 chars | `grep -o 'name="description" content="[^"]*"' index.html guide.html` |
 | FAQ count on guide page | `grep -c 'faq-item' guide.html` → 8 |
 
-If the ratings, "Join hundreds", or guarantee lines disappear from the files,
-move them from "present in corpus" to "fixed on {date}" in §2's anti-pattern
-table and update §3 accordingly.
+The ratings, "Join hundreds", and guarantee lines were removed 2026-07-07 and
+§2/§3 updated accordingly. If any such pattern reappears in the files, flag it
+as a regression via the krg-change-control ledger.

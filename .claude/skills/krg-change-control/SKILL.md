@@ -48,12 +48,12 @@ change takes the **strictest** class it touches.
 
 | Class | What it covers | Real examples in this repo | Gate |
 |---|---|---|---|
-| **A — business/legal copy** | Displayed price, guarantee/refund text, the Amazon disclosure block, revenue or social-proof claims, product star ratings | `$7.99` (5 places, see below); "100% Money-back guarantee" (guide.html:51, 270) and "100% Satisfaction Guaranteed" (guide.html:211); refund FAQ (guide.html:250-251); "Join hundreds of home cooks" (guide.html:262); disclosure block (index.html:36-40, footer index.html:328); `⭐` ratings on all 16 product cards | Explicit owner approval **before** editing + full pre-deploy checklist (§3). **AI sessions must never change Class A content unprompted** — propose a diff and wait. |
+| **A — business/legal copy** | Displayed price, guarantee/refund text, the Amazon disclosure block, revenue or social-proof claims, product star ratings | `$7.99` (5 places, see below); the platform-dependent refund FAQ (guide.html:250-251); the trust badges (guide.html:50-54); disclosure block (index.html:36-40, footer index.html:312). Former examples — fabricated `⭐` ratings and the "Join hundreds"/money-back-guarantee claims — were removed in the owner-approved 2026-07-07 cleanup (ledger items 4-5); reintroducing anything like them is Class A | Explicit owner approval **before** editing + full pre-deploy checklist (§3). **AI sessions must never change Class A content unprompted** — propose a diff and wait. |
 | **B — structural** | New pages, new/removed product cards, new categories, nav changes, any script.js change | Adding a 17th product card to index.html; adding a `data-category` value (script.js filters on it); changing the nav in either page's `<header>` | Full pre-deploy checklist (§3) + local preview + both-pages consistency check (rule home: `krg-architecture-and-conventions`) |
 | **C — cosmetic** | Colors, spacing, typo fixes in non-legal copy | Editing a CSS custom property in styles.css (~835 lines); fixing a typo in a product description | Local preview + spot-check the changed element on both desktop and narrow width |
 
 **Find every price location** (tested 2026-07-07; expect exactly **5** matches —
-index.html:172, guide.html:8, 44, 208, 264):
+index.html:164, guide.html:8, 44, 208, 264):
 
 ```bash
 grep -no '\$7\.99' index.html guide.html
@@ -80,7 +80,7 @@ the legally-grounded ones, marked **(legal)**, which are genuinely non-negotiabl
 
 1. **(legal) Keep the Amazon Associates disclosure visible on any page with
    affiliate links.** index.html has 16 Amazon affiliate links and carries the
-   disclosure twice (banner at lines 36-40, footer at line 328). Removing or
+   disclosure twice (banner at lines 36-40, footer at line 312). Removing or
    hiding it risks FTC trouble and Amazon Associates account termination —
    details and exact required wording live in `krg-affiliate-monetization-reference`.
    guide.html currently has no Amazon links, so it needs no Amazon disclosure;
@@ -174,17 +174,18 @@ Run from inside the KRG project folder. Steps 1-3 are commands; 4-8 are eyes-on.
 ## 4. Open-items ledger
 
 Started **2026-07-06**. No prior incident history exists — the five site files
-have not changed since commit `b863b95` (2026-02-04, no reverts); later commits
-touch only `.claude/skills/`. Seeded from the 2026-07-06 audit — real findings only.
-Every evidence command below was run and its count verified on 2026-07-06.
+were unchanged from commit `b863b95` (2026-02-04, no reverts) until the
+owner-approved 2026-07-07 Class A cleanup (items 4-5 below). Seeded from the
+2026-07-06 audit — real findings only. Every evidence command below was run
+and its count verified on the date shown in its Status column.
 
 | # | Item | Evidence (run from project folder) | Status | Fixed via |
 |---|---|---|---|---|
 | 1 | 16 affiliate "View on Amazon" links are `href="#"` placeholders (earn $0) | `grep -c 'btn-affiliate' index.html` → 16, all `href="#"` | open | `krg-launch-campaign` |
 | 2 | 3 "Buy on Etsy" links point at placeholder shop `YourShop` (guide.html:48, 210, 267) | `grep -n 'YourShop' guide.html` → 3 lines | open | `krg-launch-campaign` |
-| 3 | 2 Patreon footer links are `href="#"` (index.html:324, guide.html:290) | `grep -n 'Patreon' index.html guide.html` | open | `krg-launch-campaign` |
-| 4 | Fabricated star ratings on all 16 product cards (e.g. "⭐⭐⭐⭐⭐ (4.8)") — **compliance risk**, not sourced from Amazon | `grep -c 'product-rating' index.html` → 16 | open | `krg-launch-campaign` (policy detail: `krg-affiliate-monetization-reference`) |
-| 5 | Unsubstantiated claims in guide.html: "hundreds of home cooks" (line 262), guarantee claims (money-back: 51, 270; satisfaction: 211) and refund FAQ (250-251) with no product sold yet — **compliance risk** | `grep -ni 'hundreds\|guarantee\|refund' guide.html` | open | `krg-launch-campaign` |
+| 3 | 2 Patreon footer links are `href="#"` (index.html:308, guide.html:290) | `grep -n 'Patreon' index.html guide.html` | open | `krg-launch-campaign` |
+| 4 | Fabricated star ratings on all 16 product cards ("⭐⭐⭐⭐⭐ (4.8)") — compliance risk, not sourced from Amazon | `grep -c 'product-rating' index.html` → **0** since fix (was 16) | **closed 2026-07-07** — all 16 rating lines deleted, owner-approved Class A change (policy detail: `krg-affiliate-monetization-reference`) | — |
+| 5 | Unsubstantiated claims in guide.html: "hundreds of home cooks", money-back/satisfaction guarantees, 30-day refund promise — compliance risk with no product sold yet | `grep -ci 'hundreds of home cooks\|money-back\|Satisfaction Guaranteed\|Delivered in 2 minutes' guide.html` → **0** since fix | **closed 2026-07-07** — claims replaced with verifiable copy (digital download / one-time purchase); refund FAQ now defers to the sales platform's policy, owner-approved Class A change | — |
 
 Ledger maintenance: when an item is fixed, change its status to
 `closed YYYY-MM-DD` and note the commit; when a new audit finding appears, add
@@ -209,13 +210,13 @@ a row with a tested evidence command. Never delete rows.
 
 ## Provenance & maintenance
 
-Authored **2026-07-06** against commit `b863b95` (repo state: 5 site files, no
-build system); reviewed & corrected 2026-07-07. All counts and commands above
-were executed and verified. The five site files have not changed since commit
-`b863b95` (2026-02-04); later commits touch only `.claude/skills/` — verify:
+Authored **2026-07-06** against commit `b863b95`; reviewed & corrected
+2026-07-07; ledger items 4-5 closed 2026-07-07 (owner-approved ratings/claims
+cleanup — the first site-file change since `b863b95`, 2026-02-04). Verify which
+commit last touched the site files:
 `git log --oneline -1 -- index.html guide.html styles.css script.js README.md`
-(expect `b863b95`). Volatile facts and their one-line re-verification commands
-(run from the project folder):
+(expect the 2026-07-07 claims-cleanup commit). Volatile facts and their
+one-line re-verification commands (run from the project folder):
 
 | Fact (as of 2026-07-06) | Re-verify with |
 |---|---|
@@ -223,7 +224,8 @@ were executed and verified. The five site files have not changed since commit
 | Price digits `7.99` in exactly 5 places (all-locations sweep, catches $-less copies) | `grep -rn '7\.99' index.html guide.html \| wc -l` |
 | 18 `href="#"` placeholders (16 affiliate + 2 Patreon) | `grep -n 'href="#"' index.html guide.html \| wc -l` |
 | 3 `YourShop` Etsy placeholders | `grep -c 'YourShop' guide.html` |
-| 16 product cards with fabricated ratings | `grep -c 'product-rating' index.html` |
+| 0 fabricated rating lines (removed 2026-07-07) | `grep -c 'product-rating' index.html` → 0 |
+| 0 unsubstantiated claim lines (rewritten 2026-07-07) | `grep -ci 'hundreds of home cooks\|money-back\|Satisfaction Guaranteed' guide.html` → 0 |
 | All affiliate links carry nofollow (0 = clean) | `grep -n 'btn-affiliate' index.html \| grep -vc 'rel="nofollow"'` |
 | Still zero-build (no package.json) | `ls package.json` (should error: No such file) |
 

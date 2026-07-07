@@ -69,7 +69,7 @@ https://www.amazon.com/dp/B01N5PWDSO/?tag=yourtag-20
   link without it earns nothing.
 - Current state [REPO]: all 16 product links are `href="#"` placeholders.
   Verify: `grep -c 'btn-affiliate' index.html` → 16 anchors, all `href="#"`
-  (index.html lines 70–289; baseline 2026-07-06 — authoritative source: run
+  (index.html lines 69–273; baseline 2026-07-06 — authoritative source: run
   `bash .claude/skills/krg-qa-and-diagnostics/scripts/audit_placeholders.sh`).
   Not one real URL exists yet.
 
@@ -80,7 +80,7 @@ below the hero, above the product grid:
 
 > "Disclosure: As an Amazon Associate, I earn from qualifying purchases."
 
-A shorter repeat sits in the footer (index.html line 328). Verify both:
+A shorter repeat sits in the footer (index.html line 312). Verify both:
 `grep -n "Amazon Associate" index.html`. Do not reword either without going
 through krg-change-control (legal copy = Class A).
 
@@ -103,15 +103,16 @@ verify at Amazon Associates Program Policies — mapped to a current repo fact.
 
 | Rule (conservative reading) | Repo fact today | Status |
 |---|---|---|
-| Do not display star ratings / review counts unless pulled from Amazon's approved tooling (e.g. their API or SiteStripe output) | Site FABRICATES ratings: 16 lines like `⭐⭐⭐⭐⭐ (4.8)` invented by a template, not sourced from Amazon. Find them all: `grep -n "product-rating" index.html` | **OPEN compliance issue — fix before applying** |
+| Do not display star ratings / review counts unless pulled from Amazon's approved tooling (e.g. their API or SiteStripe output) | Site formerly fabricated 16 rating lines (`⭐⭐⭐⭐⭐ (4.8)`); all deleted 2026-07-07. Confirm clean: `grep -c "product-rating" index.html` → 0 | **FIXED 2026-07-07 — never reintroduce without an approved data source** |
 | Do not state exact prices that go stale (price display has strict conditions) | Site shows RANGES like `$8-15` (`grep -n "product-price" index.html`), which avoids the stale-exact-price problem. Whether ranges fully satisfy policy is a nuance to verify at the source | Design mitigation; nuance unverified |
 | Do not cloak or shorten affiliate links (bit.ly etc.) — the tag must be visible in the destination URL | No shorteners in repo today; keep it that way when real links land | OK — guard |
 | Do not incentivize clicks ("click my link to support me" tied to rewards) | Disclosure says clicks "help support the free content" — thank-you framing, generally fine; do not escalate to paid incentives | OK — guard |
 | Do not place affiliate links in email, PDFs, or other offline/closed content | Owner sells a PDF (guide.html). Temptation: put Amazon links inside the PDF. **Do not** — the PDF must link back to the website instead | Guard — relevant because of the PDF product |
 
-The fix PROCEDURE for the ratings issue (remove or re-source) belongs to
-krg-launch-campaign; the edit mechanics to krg-content-catalog. This skill only
-establishes that it must happen before the Associates application.
+The ratings fix (launch-campaign Phase 1, menu option 1: delete) was executed
+2026-07-07, before any Associates application — as this skill requires.
+Reintroducing ratings requires a real approved data source and routes through
+krg-change-control (Class A).
 
 ## 3. rel="nofollow" vs rel="sponsored"
 
@@ -154,9 +155,10 @@ these as current numbers.
 | Fit for KRG | Extra discovery traffic; brand match with "handmade/craft" | Fastest path to a working buy link | Similar to Gumroad; compare current fees |
 
 **Open decision** — no platform is chosen yet. The choice, account creation,
-and URL replacement are krg-launch-campaign work. Note: guide.html promises
-"Delivered in 2 minutes" and a money-back guarantee; both depend on the
-platform actually chosen (see section 7).
+and URL replacement are krg-launch-campaign work. (guide.html's former
+"Delivered in 2 minutes" and money-back-guarantee promises were removed
+2026-07-07 precisely because they depended on this unchosen platform — see
+section 7; reintroduce only after the chosen platform verifiably honors them.)
 
 ## 5. Patreon in one paragraph
 
@@ -164,7 +166,7 @@ Patreon is a recurring-membership platform: fans pledge a monthly amount in
 exchange for extras (bonus recipes, early access). It is the smallest and most
 speculative of the three channels — it needs an audience first, so it earns
 nothing at launch. [REPO] The footer link is a dead placeholder: `href="#"` on
-"Join on Patreon" in index.html line 324 and guide.html line 290. Verify:
+"Join on Patreon" in index.html line 308 and guide.html line 290. Verify:
 `grep -n "Join on Patreon" *.html`. Either wire it to a real
 `patreon.com/username` page or remove it until one exists — a dead "Join"
 link erodes trust. (Decision: open; execution: krg-launch-campaign.)
@@ -181,7 +183,7 @@ Honest assessment of THIS site today [REPO]:
 
 | Page | State | Verdict |
 |---|---|---|
-| index.html | Disclosure banner at line 38, directly below the hero and ABOVE all 16 affiliate links, plus a footer repeat at line 328 | Good — placement is before the links, not footer-only |
+| index.html | Disclosure banner at line 38, directly below the hero and ABOVE all 16 affiliate links, plus a footer repeat at line 312 | Good — placement is before the links, not footer-only |
 | guide.html | Contains NO affiliate links (`grep -c 'btn-affiliate' guide.html` → 0 and `grep -c 'href="https://www.amazon' guide.html` → 0). One editorial Amazon *mention* at line 227 — FAQ text "…we provide a complete Amazon shopping list for easy ordering." — which is not a link and triggers no disclosure requirement | No affiliate disclosure needed on this page |
 
 Keep it this way: if affiliate links are ever added to guide.html or any new
@@ -201,10 +203,10 @@ each item is a problem. All repo locations verified 2026-07-06.
 
 | Claim in copy | Where [REPO] | Why it's a problem | Status |
 |---|---|---|---|
-| `⭐⭐⭐⭐⭐ (4.8)` etc., ×16 | index.html product cards (`grep -n "product-rating" index.html`) | Fabricated — not from Amazon; violates Associates rules AND is deceptive social proof | **OPEN — must fix before Associates application** |
-| "Join hundreds of home cooks" | guide.html line 262 | Unsubstantiated audience claim — the site has zero customers today | OPEN — soften or earn it |
-| "100% Money-back guarantee" | guide.html lines 51, 270 (also "100% Satisfaction Guaranteed", line 211) | Only truthful if the owner will actually honor refunds — and the chosen sales platform must support them (Etsy digital-item refund handling differs from Gumroad/Payhip; verify per platform) | OPEN — depends on platform choice + owner commitment |
-| "Delivered in 2 minutes" | guide.html lines 52, 211 | Delivery timing is the platform's behavior, not the owner's; verify instant-delivery works on the chosen platform before keeping this | OPEN — depends on platform choice |
+| `⭐⭐⭐⭐⭐ (4.8)` etc., ×16 | Was in every index.html product card; all 16 lines deleted 2026-07-07 (`grep -c "product-rating" index.html` → 0) | Fabricated — not from Amazon; violated Associates rules AND was deceptive social proof | **FIXED 2026-07-07** — never reintroduce without a real data source |
+| "Join hundreds of home cooks" | Was guide.html line 262; replaced 2026-07-07 with "Make authentic … in your own kitchen" | Unsubstantiated audience claim — the site had zero customers | **FIXED 2026-07-07** — publish real counts only when they exist |
+| "100% Money-back guarantee" / "100% Satisfaction Guaranteed" | Were guide.html lines 51, 211, 270; replaced 2026-07-07 with "Digital PDF download" / "One-time purchase" badges; the refund FAQ now defers to the sales platform's policy | Only truthful if the owner and the chosen platform demonstrably honor refunds | **FIXED 2026-07-07** — reintroduce only with platform-verified refund mechanics (Class A) |
+| "Delivered in 2 minutes" | Were guide.html lines 52, 211; removed 2026-07-07 | Delivery timing is the platform's behavior, not the owner's | **FIXED 2026-07-07** — reintroduce only after verifying instant delivery on the chosen platform |
 | Price ranges "$8-15" etc. | index.html product cards | Safer than exact prices (go stale) but policy nuance unverified — see section 2 | Mitigated; nuance to verify |
 | README revenue math ("~$200-240/month") | README.md lines 194–204 | Internal projection only — never surface commission-rate math in public copy; rates are unverified | Guard — keep out of site copy |
 
@@ -215,7 +217,7 @@ each item is a problem. All repo locations verified 2026-07-06.
   rather than trusting line numbers).
 - Re-verify repo facts with:
   - `grep -c 'btn-affiliate' index.html` (16 affiliate anchors, all `href="#"`)
-  - `grep -n "product-rating" index.html` (16 fabricated rating lines)
+  - `grep -c "product-rating" index.html` (0 — fabricated ratings removed 2026-07-07)
   - `grep -n "Amazon Associate" index.html` (disclosure at ~line 38 + footer)
   - `grep -c 'rel="nofollow"' index.html` (16; no `sponsored` yet)
   - `grep -n "YourShop" guide.html` (3 Etsy placeholders)

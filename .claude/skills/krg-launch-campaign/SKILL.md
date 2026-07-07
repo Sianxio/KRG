@@ -3,8 +3,9 @@ name: krg-launch-campaign
 description: >
   The KRG monetization launch campaign — an executable, decision-gated runbook
   that takes the Korean Ramen Guide site from "cannot earn a cent" (16 dead
-  affiliate buttons, 3 placeholder Etsy links, 2 dead Patreon links, fabricated
-  ratings, unsubstantiated claims) to live and earning. Load when asked to
+  affiliate buttons, 3 placeholder Etsy links, 2 dead Patreon links; the
+  fabricated-ratings/claims cleanup of Phase 1 was completed 2026-07-07) to
+  live and earning. Load when asked to
   launch the site, monetize it, "make the site earn", replace placeholder
   links, fix the affiliate buttons, apply to Amazon Associates, set up an
   Etsy/Gumroad/Payhip shop for the PDF, or decide what to fix before applying
@@ -51,7 +52,7 @@ approval first (rule home: `krg-change-control` §1 and §5).
 | # | Milestone | Gate command | Pass condition | Done |
 |---|---|---|---|---|
 | 0 | Baseline confirmed | `bash .claude/skills/krg-qa-and-diagnostics/scripts/audit_placeholders.sh` | 16 / 3 / 2 (or updated baseline) | ☐ |
-| 1 | Fabricated ratings + claims cleaned | `grep -c '⭐' index.html` | `0` (or documented exception) | ☐ |
+| 1 | Fabricated ratings + claims cleaned | `grep -c '⭐' index.html` | `0` (or documented exception) | ☑ 2026-07-07 |
 | 2a | PDF sales account live, ONE buy URL in hand | open URL in browser | checkout page loads | ☐ |
 | 2b | Site deployed (PDF-only is fine) | see `krg-preview-and-deploy` | live URL loads | ☐ |
 | 3 | PDF buy link inserted ×3 | `grep -c 'YourShop' guide.html` | `0`, new URL appears 3× | ☐ |
@@ -86,7 +87,7 @@ grep -n 'Patreon' index.html guide.html | grep -c 'href="#"'           # → 2
 
 Locations for reference: affiliate buttons are 16 `btn-affiliate` lines in
 index.html; Etsy placeholders at guide.html lines 48, 210, 267; Patreon at
-index.html:324 and guide.html:290. (Line numbers drift after edits — trust
+index.html:308 and guide.html:290. (Line numbers drift after edits — trust
 the greps, not memorized numbers.)
 
 > **GATE 0:** all three numbers match the baseline above → proceed to
@@ -102,22 +103,30 @@ the greps, not memorized numbers.)
 
 ## PHASE 1 — Compliance pre-clean (MUST precede the Amazon application)
 
-The site currently shows content that violates affiliate-program and
-truth-in-advertising rules. Clean it BEFORE Amazon reviews the site. The
-detailed WHY (which rules, which policies) lives in
+> **✅ PHASE 1 COMPLETED 2026-07-07** (owner-approved Class A change): all 16
+> rating lines deleted (Step 1.2 menu option 1); guide.html claims replaced
+> with verifiable copy; refund FAQ now defers to the sales platform's policy;
+> `krg-change-control` §4 ledger rows 4–5 closed. GATE 1 verified:
+> `grep -c '⭐' index.html` → 0. The steps below remain as the procedure
+> record and as the playbook should this class of problem recur.
+
+The site formerly showed content that violates affiliate-program and
+truth-in-advertising rules; it had to be cleaned BEFORE Amazon reviews the
+site. The detailed WHY (which rules, which policies) lives in
 `krg-affiliate-monetization-reference` — cite it, do not re-derive it here.
 
 **Everything in this phase is Class A** (ratings, guarantees, social proof):
 AI sessions propose the exact diff and STOP until the owner approves in the
 conversation, per `krg-change-control` §5.
 
-**Step 1.1** — Enumerate the fabricated ratings (tested; returns 16 lines):
+**Step 1.1** — Enumerate the fabricated ratings (returned 16 lines at the
+2026-07-06 baseline; 0 since the fix):
 
 ```bash
 grep -n 'product-rating' index.html
 ```
 
-Every one is an invented value like `⭐⭐⭐⭐⭐ (4.8)` — not pulled from Amazon.
+Each was an invented value like `⭐⭐⭐⭐⭐ (4.8)` — not pulled from Amazon.
 
 **Step 1.2** — Owner decision on ratings. Ranked menu:
 
@@ -131,8 +140,9 @@ Every one is an invented value like `⭐⭐⭐⭐⭐ (4.8)` — not pulled from 
    they go stale and were never licensed for reuse. Rationale:
    `krg-affiliate-monetization-reference`.
 
-**Step 1.3** — Enumerate the unsubstantiated guide.html claims (tested;
-returns 8 lines as of baseline):
+**Step 1.3** — Enumerate the unsubstantiated guide.html claims (returned 8
+lines at the 2026-07-06 baseline; since the fix only the harmless refund-FAQ
+question and footer "Refund Policy" text match):
 
 ```bash
 grep -niE 'hundreds of home cooks|money-back|satisfaction guaranteed|delivered in 2 minutes|refund' guide.html
@@ -182,9 +192,9 @@ menu — pick ONE; the deliverable is **one working buy URL**:
 
 If the owner picks Gumroad or Payhip, the button text "Buy Now on Etsy →"
 (guide.html:48) must change too — that is a copy edit, route it with the
-Phase 3 link edit. Whatever the platform: confirm its refund mechanics match
-whatever guarantee text survived Phase 1, and confirm delivery really is
-instant before keeping "Delivered in 2 minutes".
+Phase 3 link edit. Whatever the platform: no guarantee or delivery-time text
+survived the Phase 1 cleanup — reintroduce such claims only if the chosen
+platform verifiably honors them (Class A, `krg-change-control`).
 
 **Deliverable:** one URL that, opened in a private/incognito browser window,
 shows a working checkout for the PDF at $7.99 (price appears in exactly 5
@@ -218,7 +228,7 @@ few sales) or the account is **closed**. Therefore:
 Two footer links are `href="#"`. Menu: **(1) remove the footer Patreon links
 from both pages** (recommended until a Patreon exists — a dead link looks
 broken) or **(2) create a Patreon page and fill both hrefs**. Either way,
-edit BOTH files (index.html:324, guide.html:290 at baseline) — the both-pages
+edit BOTH files (index.html:308, guide.html:290 as of 2026-07-07) — the both-pages
 rule lives in `krg-architecture-and-conventions`.
 
 > **GATE 2:** the owner can paste ONE PDF buy URL into the conversation and
@@ -341,9 +351,9 @@ Closing actions:
 ## Provenance & maintenance
 
 Authored **2026-07-06** against the repo at that date; reviewed & corrected
-2026-07-07 (5 site files, no build system; the site files have not changed
-since commit `b863b95`, 2026-02-04 — later commits touch only
-`.claude/skills/`; verify:
+2026-07-07; Phase 1 executed and recorded 2026-07-07 (the first site-file
+change since commit `b863b95`, 2026-02-04; verify which commit last touched
+the site files:
 `git log --oneline -1 -- index.html guide.html styles.css script.js README.md`).
 Every repo command above was executed and verified. External platform statements (Amazon Associates review/closure
 policy, Gumroad/Payhip/Etsy fees and flows) are as-of-knowledge 2026-07 and
@@ -358,8 +368,8 @@ expected values here in the same change.
 | 16 affiliate `href="#"` buttons | `grep -c 'href="#" class="btn btn-primary btn-affiliate"' index.html` |
 | 3 `YourShop` Etsy placeholders | `grep -c 'YourShop' guide.html` |
 | 2 Patreon `href="#"` footer links | `grep -n 'Patreon' index.html guide.html \| grep -c 'href="#"'` |
-| 16 fabricated star-rating lines | `grep -c 'product-rating' index.html` (stars: `grep -c '⭐' index.html`) |
-| 8 claim lines in guide.html | `grep -cniE 'hundreds of home cooks\|money-back\|satisfaction guaranteed\|delivered in 2 minutes\|refund' guide.html` |
+| 0 rating lines (Phase 1 done 2026-07-07) | `grep -c 'product-rating' index.html` → 0 (stars: `grep -c '⭐' index.html` → 0) |
+| 0 hard-claim lines in guide.html (only the refund-FAQ question + footer "Refund Policy" label still match the broad grep) | `grep -cniE 'hundreds of home cooks\|money-back\|satisfaction guaranteed\|delivered in 2 minutes' guide.html` → 0 |
 | 0 `tag=` anywhere yet | `grep -c 'tag=' index.html` |
 | Price $7.99 in exactly 5 places | `grep -no '\$7\.99' index.html guide.html \| wc -l` |
 | Audit scripts present | `ls .claude/skills/krg-qa-and-diagnostics/scripts/` |

@@ -51,7 +51,7 @@ A **CTA** ("call to action") is any button/link that pushes the visitor toward b
 
 | File | Lines (2026-07-06) | Contents |
 |---|---|---|
-| `index.html` | 337 | Shopping list: 16 product cards in 3 categories, filter buttons, 2 guide CTAs, disclosure block |
+| `index.html` | 321 | Shopping list: 16 product cards in 3 categories, filter buttons, 2 guide CTAs, disclosure block |
 | `guide.html` | 303 | $7.99 PDF sales page: hero, value list, feature cards, previews, FAQ, 3 Etsy buy buttons |
 | `styles.css` | 835 | All styling; palette in `:root` at top |
 | `script.js` | 76 | Category filtering + affiliate click logging (index.html only in practice) |
@@ -70,31 +70,31 @@ Per-category: `grep -o 'data-category="[^"]*"' index.html | sort | uniq -c` → 
 | # | ~Line | Product name | Category | Badge | Price shown | Note line |
 |---|---|---|---|---|---|---|
 | 1 | 61 | Korean Gochugaru (Fine Grind) | essential | Must Have | $8-15 | Try: Taekyung, Mother-In-Law's, or The Spice Way |
-| 2 | 75 | Garlic Powder | essential | — | $3-10 | Try: McCormick or Simply Organic |
-| 3 | 88 | Onion Powder | essential | — | $3-8 | Try: McCormick or Frontier Co-op |
-| 4 | 101 | MSG (Ac'cent Flavor Enhancer) | essential | Popular | $4-8 | Safe and widely used in Asian cuisine |
-| 5 | 115 | Soy Sauce Powder | essential | Hard to Find | $12-20 | Try: OliveNation or Raw Essentials |
-| 6 | 129 | Beef Stock Powder | essential | — | $6-15 | Try: Better Than Bouillon or Knorr |
-| 7 | 142 | Ginger Powder | essential | — | $3-9 | Try: McCormick or Simply Organic |
-| 8 | 155 | Toasted Sesame Oil | essential | — | $6-15 | Try: Kadoya or La Tourangelle |
-| 9 | 181 | Shiitake Mushroom Powder | optional | Premium | $12-25 | Try: FGO Organic or Terrasoul |
-| 10 | 195 | Anchovy or Bonito Powder | optional | — | $8-18 | Adds authentic ramyun depth |
-| 11 | 208 | Citric Acid | optional | — | $6-12 | Try: Milliard or Anthony's |
-| 12 | 221 | Chili Oil (Lao Gan Ma) | optional | Trending | $6-12 | Cult favorite condiment |
-| 13 | 240 | Glass Spice Jars (Set of 12) | tools | Essential | $12-25 | Try: Ball Mason or Nakpunar |
-| 14 | 254 | Digital Kitchen Scale | tools | — | $10-25 | Try: Ozeri or Etekcity |
-| 15 | 267 | Electric Spice Grinder | tools | Pro Tool | $15-35 | Try: KRUPS or Cuisinart |
-| 16 | 281 | Silica Gel Desiccant Packs | tools | — | $8-15 | Food-safe moisture absorbers |
+| 2 | 74 | Garlic Powder | essential | — | $3-10 | Try: McCormick or Simply Organic |
+| 3 | 86 | Onion Powder | essential | — | $3-8 | Try: McCormick or Frontier Co-op |
+| 4 | 98 | MSG (Ac'cent Flavor Enhancer) | essential | Popular | $4-8 | Safe and widely used in Asian cuisine |
+| 5 | 111 | Soy Sauce Powder | essential | Hard to Find | $12-20 | Try: OliveNation or Raw Essentials |
+| 6 | 124 | Beef Stock Powder | essential | — | $6-15 | Try: Better Than Bouillon or Knorr |
+| 7 | 136 | Ginger Powder | essential | — | $3-9 | Try: McCormick or Simply Organic |
+| 8 | 148 | Toasted Sesame Oil | essential | — | $6-15 | Try: Kadoya or La Tourangelle |
+| 9 | 173 | Shiitake Mushroom Powder | optional | Premium | $12-25 | Try: FGO Organic or Terrasoul |
+| 10 | 186 | Anchovy or Bonito Powder | optional | — | $8-18 | Adds authentic ramyun depth |
+| 11 | 198 | Citric Acid | optional | — | $6-12 | Try: Milliard or Anthony's |
+| 12 | 210 | Chili Oil (Lao Gan Ma) | optional | Trending | $6-12 | Cult favorite condiment |
+| 13 | 228 | Glass Spice Jars (Set of 12) | tools | Essential | $12-25 | Try: Ball Mason or Nakpunar |
+| 14 | 241 | Digital Kitchen Scale | tools | — | $10-25 | Try: Ozeri or Etekcity |
+| 15 | 253 | Electric Spice Grinder | tools | Pro Tool | $15-35 | Try: KRUPS or Cuisinart |
+| 16 | 266 | Silica Gel Desiccant Packs | tools | — | $8-15 | Food-safe moisture absorbers |
 
 **Badges in use (7):** Must Have, Popular, Hard to Find, Premium, Trending, Essential, Pro Tool.
 Verify: `grep -n 'product-badge' index.html` → 7 lines. Badges are free-text; reuse existing
 wording rather than inventing near-duplicates ("Essential" vs "Must Have" already overlap).
 
-**Known compliance issue — do not spread it:** every current card has a fabricated
-star-rating line like `<div class="product-rating">⭐⭐⭐⭐⭐ (4.8)</div>` (16 of them:
-`grep -c 'product-rating' index.html`). These ratings are made up, not from Amazon.
-**Never copy this line into new cards**, and do not "fix" the existing ones without owner
-sign-off — see `krg-change-control`.
+**Resolved compliance issue — do not reintroduce it:** cards previously carried a
+fabricated star-rating line (`<div class="product-rating">⭐⭐⭐⭐⭐ (4.8)</div>`); all 16
+were deleted in the owner-approved 2026-07-07 cleanup (`grep -c 'product-rating'
+index.html` → 0). **Never add a rating line to any card** unless the values come from a
+real rating source — that is Class A, see `krg-change-control` ledger item 4.
 
 **Affiliate links:** all 16 are placeholders:
 `grep -c 'href="#" class="btn btn-primary btn-affiliate"' index.html` → **16**
@@ -113,7 +113,7 @@ Verify: `grep -n 'data-filter' index.html`
 | `optional` | Optional Enhancers | 4 |
 | `tools` | Tools & Storage | 4 |
 
-Section headings (`class="section-title"`, lines 57 / 177 / 236) are *visual only* — the
+Section headings (`class="section-title"`, lines 57 / 169 / 224) are *visual only* — the
 filter mechanism matches `data-filter` on buttons to `data-category` on cards, nothing else.
 Full contract: `krg-architecture-and-conventions`.
 
@@ -129,7 +129,7 @@ grep -n '7\.99' index.html guide.html
 
 | File:line | Context |
 |---|---|
-| index.html:172 | Mid-page CTA button "Get Full Guide - $7.99 →" |
+| index.html:164 | Mid-page CTA button "Get Full Guide - $7.99 →" |
 | guide.html:8 | `<title>` tag (shows in browser tab and Google results) |
 | guide.html:44 | Hero `price-amount` |
 | guide.html:208 | Mid-page CTA heading "Get Instant Access for $7.99" |
@@ -148,11 +148,12 @@ Verify: `grep -n 'etsy' guide.html` → lines 48 (`btn-buy`), 210 (`btn-buy-larg
 | Preview items (`preview-item`) | "Sneak Peek", lines 130-157 | 4 | `grep -c 'preview-item' guide.html` |
 | FAQ items (`<details class="faq-item">`) | lines 221-252 | 8 | `grep -c 'faq-item' guide.html` |
 | Trust badges (3 `<span>`s in one `trust-badges` div) | lines 50-54 | 1 block | `grep -c 'trust-badges' guide.html` |
-| Social-proof line ("Join hundreds of home cooks…") | line 262 | 1 | `grep -n 'hundreds' guide.html` |
+| Final-CTA tagline ("Make authentic … in your own kitchen") | line 262 | 1 | `grep -n 'your own kitchen' guide.html` |
 
-The social-proof "hundreds of home cooks" and the "100% Money-back guarantee" badges are
-**unsubstantiated claims** — an open compliance issue. Do not add more claims like these;
-changes to them are Class A (`krg-change-control`).
+The former "hundreds of home cooks" social proof and money-back-guarantee badges were
+replaced with verifiable copy in the owner-approved 2026-07-07 cleanup (`krg-change-control`
+ledger item 5). Do not add claims like them; trust badges, guarantees, and the refund FAQ
+are Class A (`krg-change-control`).
 
 ### 2.4 Shared chrome (appears on BOTH pages — edit both, see krg-architecture-and-conventions)
 
@@ -162,9 +163,9 @@ Guide active. Verify: `grep -n 'nav-link' index.html guide.html`.
 
 **Footer — 3 sections on each page.** Quick Links are identical on both:
 `index.html` (Shopping List), `guide.html` (Buy Guide), and a **Patreon placeholder**
-`<a href="#" target="_blank">Join on Patreon</a>` (index.html:324, guide.html:290 —
+`<a href="#" target="_blank">Join on Patreon</a>` (index.html:308, guide.html:290 —
 verify: `grep -n 'Patreon' index.html guide.html`). The **Legal section intentionally
-differs**: index.html:328 carries the Amazon Associate line; guide.html:294 carries
+differs**: index.html:312 carries the Amazon Associate line; guide.html:294 carries
 "Refund Policy · Privacy Policy · Terms". After any footer edit, run the drift diff per
 `krg-architecture-and-conventions` §1 (that skill is the home for the command and the
 expected intentional-difference baseline), or run `check_consistency.sh` from
@@ -183,7 +184,7 @@ Verify: `grep -n ':root' styles.css` (block opens at line 12) and `sed -n '12,20
 | Variable | Value | Drives (main uses) |
 |---|---|---|
 | `--red` | `#D32F2F` | Brand color: logo, active nav, badges, all buy/CTA buttons, CTA gradient backgrounds (20 uses) |
-| `--orange` | `#FF6F00` | "View on Amazon" buttons (`.btn-primary`), star-rating color, disclosure accent border, arrows (6 uses) |
+| `--orange` | `#FF6F00` | "View on Amazon" buttons (`.btn-primary`), disclosure accent border, arrows; the `.product-rating` CSS rule still uses it but is unused since the 2026-07-07 rating removal (6 uses) |
 | `--dark` | `#212121` | Body text (7 uses) |
 | `--gray` | `#757575` | Secondary text: descriptions, notes, captions (18 uses) |
 | `--light` | `#F5F5F5` | Section backgrounds, card borders (11 uses) |
@@ -357,8 +358,9 @@ Three touch points, all in index.html, plus the JS contract check:
 
 ## 5. Provenance & maintenance
 
-Derived directly from the repo files on **2026-07-06**; reviewed & corrected 2026-07-07
-(index.html 337 lines, guide.html 303, styles.css 835, script.js 76). Every verification
+Derived directly from the repo files on **2026-07-06**; reviewed & corrected 2026-07-07;
+line anchors re-derived after the 2026-07-07 ratings/claims cleanup
+(index.html 321 lines, guide.html 303, styles.css 835, script.js 76). Every verification
 command above was run and its output checked; the mutation checklists are derived from
 inspection, not yet exercised. Line numbers are anchors, not gospel — re-verify each
 count before relying on it:
@@ -371,7 +373,7 @@ count before relying on it:
 | 3 section titles | `grep -c 'section-title' index.html` |
 | 7 badges, 7 distinct labels | `grep -n 'product-badge' index.html` |
 | 16 placeholder affiliate links | `grep -c 'href="#" class="btn btn-primary btn-affiliate"' index.html` |
-| 16 star-rating lines (compliance issue) | `grep -c 'product-rating' index.html` |
+| 0 star-rating lines (removed 2026-07-07) | `grep -c 'product-rating' index.html` → 0 |
 | 5 price locations (1 index + 4 guide) | `grep -n '7\.99' index.html guide.html` |
 | 3 Etsy CTAs (YourShop placeholder) | `grep -n 'etsy' guide.html` |
 | 6 value items / 8 feature cards / 4 preview items / 8 FAQ items | `for c in value-item feature-card preview-item faq-item; do echo "$c $(grep -c $c guide.html)"; done` |

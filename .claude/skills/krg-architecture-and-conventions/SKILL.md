@@ -70,7 +70,7 @@ The duplicated blocks (line numbers verified 2026-07-06):
 | Block | index.html | guide.html | Intentional difference |
 |---|---|---|---|
 | Header `<header>…</header>` | lines 13–23 | lines 13–23 | which nav link has `class="nav-link active"` (highlights the current page) |
-| Footer `<footer>…</footer>` | lines 313–333 | lines 279–299 | one line in the "Legal" column: index says "As an Amazon Associate I earn from qualifying purchases."; guide says "Refund Policy · Privacy Policy · Terms" |
+| Footer `<footer>…</footer>` | lines 297–317 | lines 279–299 | one line in the "Legal" column: index says "As an Amazon Associate I earn from qualifying purchases."; guide says "Refund Policy · Privacy Policy · Terms" |
 
 The mid-page and final CTA boxes ("CTA" = call to action, the big red buy boxes) are **not**
 verbatim copies — each page has its own (index: `.cta-box` and `.final-cta`; guide:
@@ -163,7 +163,7 @@ A "CSS custom property" is a named, reusable value declared once and referenced 
 | Property | Value | Used for |
 |---|---|---|
 | `--red` | `#D32F2F` | primary brand color: active nav, CTAs, buy buttons, prices |
-| `--orange` | `#FF6F00` | secondary accent: `.btn-primary` (Amazon buttons), ratings, disclosure border |
+| `--orange` | `#FF6F00` | secondary accent: `.btn-primary` (Amazon buttons), disclosure border (the `.product-rating` rule still references it but has been unused since the 2026-07-07 rating removal) |
 | `--dark` | `#212121` | body text, footer background |
 | `--gray` | `#757575` | secondary text |
 | `--light` | `#F5F5F5` | light backgrounds, borders |
@@ -215,7 +215,7 @@ Rule of thumb: any new multi-column layout needs a 768px rule collapsing it to o
 | 1 | Every affiliate link keeps `rel="nofollow"` and `target="_blank"` | `rel="nofollow"` tells search engines not to treat it as an endorsement (expected for paid/affiliate links); `target="_blank"` opens in a new tab so the visitor doesn't lose your site. Currently 16/16 Amazon buttons have both. |
 | 2 | The Amazon disclosure banner (`.disclosure`, index.html lines 36–40) stays on index.html, above the products | Amazon Associates and FTC rules require disclosure near affiliate links (rules detailed in `krg-affiliate-monetization-reference`). Removing it risks the affiliate account. |
 | 3 | Every `data-category` value matches an existing `data-filter` button value (`essential`, `optional`, `tools`) | Otherwise the card disappears under filtering (section 2). Adding a new category means adding BOTH a filter button and cards — checklist in `krg-content-catalog`. |
-| 4 | Both pages load the shared assets by relative path: `<link rel="stylesheet" href="styles.css">` (line 9 in both) and `<script src="script.js"></script>` (index line 335, guide line 301) | Relative paths (no leading `/` or domain) are what make drag-and-drop Netlify deploys and local double-click previews both work. Renaming/moving either file breaks both pages. |
+| 4 | Both pages load the shared assets by relative path: `<link rel="stylesheet" href="styles.css">` (line 9 in both) and `<script src="script.js"></script>` (index line 319, guide line 301) | Relative paths (no leading `/` or domain) are what make drag-and-drop Netlify deploys and local double-click previews both work. Renaming/moving either file breaks both pages. |
 | 5 | The both-pages rule (section 1): header/footer edits land in both HTML files | No templating engine to do it for you. |
 
 Fast invariant check (expected numbers in comments):
@@ -224,7 +224,7 @@ Fast invariant check (expected numbers in comments):
 grep -c 'rel="nofollow"' index.html            # 16
 grep -c 'class="product-card"' index.html      # 16
 grep -o 'data-category="[^"]*"' index.html | sort | uniq -c   # 8 essential, 4 optional, 4 tools
-grep -n 'Amazon Associate' index.html          # lines 38 (banner) and 328 (footer)
+grep -n 'Amazon Associate' index.html          # lines 38 (banner) and 312 (footer)
 grep -n 'stylesheet\|script src' index.html guide.html        # 2 hits per file
 ```
 
@@ -233,13 +233,14 @@ grep -n 'stylesheet\|script src' index.html guide.html        # 2 hits per file
 1. **No templating → drift risk.** The header/footer are hand-copied. Nothing detects drift
    except the diff commands in section 1. Every shared-chrome edit is a chance to update only
    one page.
-2. **Fabricated star ratings — OPEN compliance issue.** All 16 cards show ratings like
-   `⭐⭐⭐⭐⭐ (4.8)` (`.product-rating`, 16 occurrences) that are not real Amazon data. Same
-   family of problems: guide.html's "Join hundreds of home cooks" (line 262), money-back
-   guarantee claims (lines 51, 270), and "100% Satisfaction Guaranteed" (line 211) are
-   unsubstantiated (baseline 2026-07-06 — status home: `krg-change-control` §4 ledger;
-   full inventory: `krg-affiliate-monetization-reference` §7). Do not copy this pattern
-   into new cards or pages. Compliance details and remediation live in
+2. **Fabricated star ratings — RESOLVED 2026-07-07.** All 16 cards formerly showed
+   invented `.product-rating` lines; they and guide.html's unsubstantiated claims
+   ("Join hundreds of home cooks", money-back/satisfaction guarantees, "Delivered in
+   2 minutes") were removed or replaced with verifiable copy in the owner-approved
+   2026-07-07 cleanup (status home: `krg-change-control` §4 ledger items 4–5; full
+   inventory: `krg-affiliate-monetization-reference` §7). The `.product-rating` CSS
+   rule remains in styles.css but is unused. Do not reintroduce this pattern in new
+   cards or pages — that is Class A. Compliance details live in
    `krg-affiliate-monetization-reference`.
 3. **script.js injects a `<style>` element at runtime** (lines 63–76) to define the `fadeIn`
    animation. That keyframe is invisible in styles.css — if you search the stylesheet for
@@ -282,16 +283,17 @@ is read from the artifacts (and matches the README's deploy manual):
 
 ## Provenance & maintenance
 
-Verified against `/home/user/KRG` on **2026-07-06**; reviewed & corrected 2026-07-07.
-The five site files have not changed since commit `b863b95` (2026-02-04); later commits
-touch only `.claude/skills/`. No abandoned work branches; the `claude/*` branch carries
+Verified against `/home/user/KRG` on **2026-07-06**; reviewed & corrected 2026-07-07;
+line anchors re-derived after the 2026-07-07 ratings/claims cleanup (the first site-file
+change since `b863b95`, 2026-02-04; index.html is now 321 lines).
+No abandoned work branches; the `claude/*` branch carries
 only the skill library. Every command below was actually run from inside the KRG folder
 and produced the stated results. If any re-check disagrees with this file, trust the
 repo and update this file.
 
 | Fact | Re-verify with (run inside the KRG folder) |
 |---|---|
-| File set & line counts (index 337, guide 303, css 835, js 76) | `wc -l index.html guide.html styles.css script.js` |
+| File set & line counts (index 321, guide 303, css 835, js 76) | `wc -l index.html guide.html styles.css script.js` |
 | Header duplication + only-active-class difference | `diff <(sed -n '/<header>/,/<\/header>/p' index.html) <(sed -n '/<header>/,/<\/header>/p' guide.html)` |
 | Footer duplication + only-Legal-line difference | `diff <(sed -n '/<footer>/,/<\/footer>/p' index.html) <(sed -n '/<footer>/,/<\/footer>/p' guide.html)` |
 | 4 filter values | `grep -o 'data-filter="[^"]*"' index.html` |
@@ -303,6 +305,6 @@ repo and update this file.
 | Breakpoints at lines 785 & 823 | `grep -n '@media' styles.css` |
 | Shared assets linked from both pages | `grep -n 'stylesheet\|script src' index.html guide.html` |
 | Runtime style injection & inline display toggling | `grep -n "createElement('style')\|style.display" script.js` |
-| 16 fabricated ratings; "Join hundreds"; guarantee claims | `grep -c 'product-rating' index.html; grep -n 'Join hundreds\|Money-back\|money-back' guide.html` |
+| 0 rating lines / 0 claim lines (removed 2026-07-07) | `grep -c 'product-rating' index.html; grep -c 'Join hundreds\|Money-back\|money-back' guide.html` → 0 and 0 |
 | Disclosure banner on index only | `grep -n 'Amazon Associate' index.html guide.html` |
-| Site files unchanged since `b863b95` (2026-02-04) | `git log --oneline -1 -- index.html guide.html styles.css script.js README.md` (expect `b863b95`) |
+| Last site-file change = the 2026-07-07 claims-cleanup commit | `git log --oneline -1 -- index.html guide.html styles.css script.js README.md` |

@@ -62,7 +62,7 @@ The filter logic (`script.js` lines 9–32) attaches a click handler to every `.
 grep -n '<script src=' index.html guide.html
 ```
 
-Expected (verified): `index.html:335` and `guide.html:301`, both `<script src="script.js"></script>`. Discriminator: devtools console shows a red **404** for script.js, or the Network tab (next to Console) lists script.js in red. Fix: correct the filename/path in the tag.
+Expected (verified): `index.html:319` and `guide.html:301`, both `<script src="script.js"></script>`. Discriminator: devtools console shows a red **404** for script.js, or the Network tab (next to Console) lists script.js in red. Fix: correct the filename/path in the tag.
 
 **b) A JS error earlier in the file kills everything.** One syntax error anywhere in script.js stops the whole file — filters, smooth scroll, click logging, and the injected fadeIn style all die together (see Latent traps). Discriminator: console shows a red error naming `script.js` and a line number. Machine check:
 
@@ -173,7 +173,7 @@ Reproduce without a phone: devtools → click the **device toolbar** icon (a pho
 
 ## Latent traps — identified by static audit 2026-07-06, no incident yet
 
-None of these has ever bitten (the five site files have not changed since commit `b863b95`, 2026-02-04, no reverts; later commits touch only `.claude/skills/` — verify: `git log --oneline -1 -- index.html guide.html styles.css script.js README.md`). They are wired into the current code and *will* produce confusing symptoms someday:
+None of these has ever bitten (the site files saw no functional change between commit `b863b95`, 2026-02-04, and the copy-only ratings/claims cleanup of 2026-07-07; no reverts — verify: `git log --oneline -- index.html guide.html styles.css script.js README.md`). They are wired into the current code and *will* produce confusing symptoms someday:
 
 1. **fadeIn lives inside script.js.** The `@keyframes fadeIn` CSS is injected at runtime by script.js lines 63–76 (`document.createElement('style')`). If script.js fails to load or has a syntax error, the animation definition vanishes *along with* the filters — one root cause, two symptoms. Don't chase them separately; run §1b first.
 2. **Inline `display` styles can override future CSS.** Filtering sets `card.style.display = 'block'` / `'none'` directly on each card (script.js lines 23/27). Inline styles beat stylesheet rules, so if you later restyle `.product-card` with `display: flex` or `grid` in styles.css, cards will look right on page load but **snap back to `block`** the first time anyone clicks a filter. If a card's layout "breaks only after filtering", this is why.
@@ -182,7 +182,7 @@ None of these has ever bitten (the five site files have not changed since commit
 
 ## Provenance & maintenance
 
-Verified against the working tree on **2026-07-06**; reviewed & corrected 2026-07-07 (index.html 337 lines, guide.html 303, styles.css 835, script.js 76). Re-verify the load-bearing facts in one pass from the site folder:
+Verified against the working tree on **2026-07-06**; reviewed & corrected 2026-07-07; line anchors re-derived after the 2026-07-07 ratings/claims cleanup (index.html 321 lines, guide.html 303, styles.css 835, script.js 76). Re-verify the load-bearing facts in one pass from the site folder:
 
 ```bash
 grep -o 'data-category="[^"]*"' index.html | sort | uniq -c            # expect 8 essential / 4 optional / 4 tools

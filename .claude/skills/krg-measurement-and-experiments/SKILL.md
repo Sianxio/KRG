@@ -68,7 +68,7 @@ project's memory and guarantee the same idea gets re-tried blind.
 
 ## 2. Current instrumentation truth (verified 2026-07-06)
 
-`script.js` lines 51–59 (loaded by BOTH pages — `index.html:335`,
+`script.js` lines 51–59 (loaded by BOTH pages — `index.html:319`,
 `guide.html:301`):
 
 ```js
@@ -130,7 +130,7 @@ if (typeof gtag === 'function') {
 console.log('Affiliate click:', productName); // keep for local debugging
 ```
 
-A matching CANDIDATE for the guide CTA (the `.btn-cta` box, `index.html:169`)
+A matching CANDIDATE for the guide CTA (the `.btn-cta` box, `index.html:161`)
 and the guide page's buy buttons would use events like `guide_cta_click` and
 `buy_click`. Route the edit through `krg-change-control`; verify events arrive
 in GA4's realtime view after deploy (`krg-preview-and-deploy`).
@@ -173,9 +173,9 @@ thumb — these are heuristics, not statistics:
 **All numbers below are ILLUSTRATIVE (hypothetical), invented to show the
 method.** Repo facts are real and verified.
 
-Real elements: `index.html:169` has `<div class="cta-box">` — "Want the
+Real elements: `index.html:161` has `<div class="cta-box">` — "Want the
 Complete Recipe Guide?" with button text **"Get Full Guide - $7.99 →"**
-(`index.html:172`) linking to `guide.html`. It sits AFTER the 8 "Essential
+(`index.html:164`) linking to `guide.html`. It sits AFTER the 8 "Essential
 Ingredients" cards (Korean Gochugaru (Fine Grind) through Toasted Sesame Oil)
 and BEFORE the "Optional Enhancers" grid.
 
@@ -255,7 +255,7 @@ Written 2026-07-06 against the repo as of that date; reviewed & corrected
 
 - Click handler still console-only: `grep -n "console.log" /home/user/KRG/script.js` (expect line ~56 inside the `.btn-affiliate` listener; if it now calls `gtag`, section 2 is stale).
 - No analytics installed: `grep -in "gtag\|googletagmanager\|analytics" /home/user/KRG/index.html /home/user/KRG/guide.html` (any hit = section 2/3 stale, update "Current value" column).
-- CTA box location: `grep -n "cta-box\|btn-cta" /home/user/KRG/index.html` (expect cta-box at ~line 169, after the essential grid; if moved, the worked example's premise changed).
+- CTA box location: `grep -n "cta-box\|btn-cta" /home/user/KRG/index.html` (expect cta-box at ~line 161, after the essential grid; if moved, the worked example's premise changed).
 - README metric claims: `grep -n "30-50\|10-20\|Analytics to Track" /home/user/KRG/README.md`.
 - Placeholder buy links: `grep -n "YourShop" /home/user/KRG/guide.html` (no hits = launch happened; update "pre-launch" rows).
 - External facts (GA4 setup/consent rules, Netlify Analytics pricing, Netlify split testing, Amazon Associates report fields): all labeled "as of author's knowledge 2026-07" — verify at the vendor's own docs/dashboards before acting.
