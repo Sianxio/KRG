@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "codemyspec": {
+      "source": {
+        "source": "github",
+        "repo": "Code-My-Spec/plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "codemyspec@codemyspec": true
+  }
+}
