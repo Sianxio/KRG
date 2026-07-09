@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#100e1a">
+</head>
+<body>
+<title>Lords of Chaos — Wizard Duel</title>
+<style>
+  :root{
+    --ground:#100e1a; --panel:#1d1932; --panel-2:#262042; --line:#3b3263;
+    --ink:#e9e2cf; --ink-dim:#a99f86; --gold:#d6a944; --gold-hi:#f0c96a;
+    --p1:#6db2ff; --p2:#ff6b5e; --mana:#9d86ff; --good:#7fd68a; --bad:#ff8a7a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(120% 90% at 50% 0%, #191430 0%, var(--ground) 60%) fixed var(--ground);
+    color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    touch-action:manipulation; overflow:hidden;
+  }
+  #app{display:flex;flex-direction:column;height:100dvh;max-width:560px;margin:0 auto;padding:6px 8px 10px}
+  .serif{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+
+  /* ---------- header ---------- */
+  header{display:flex;align-items:center;gap:8px;padding:4px 2px 8px}
+  .vitals{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+  .vitals .who{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim)}
+  .vitals .who b{color:var(--ink);font-weight:600;letter-spacing:.08em}
+  .vitals.you .who b{color:var(--p1)} .vitals.foe .who b{color:var(--p2)}
+  .bar{height:6px;border-radius:3px;background:#0c0a16;margin-top:4px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:3px;transition:width .3s}
+  .hp i{background:linear-gradient(90deg,#c9503f,#e8795f)}
+  .you .hp i{background:linear-gradient(90deg,#3f7bc9,#6db2ff)}
+  .mp i{background:linear-gradient(90deg,#6a54c9,#9d86ff)}
+  .nums{display:flex;justify-content:space-between;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;color:var(--ink-dim);margin-top:3px;font-variant-numeric:tabular-nums}
+  #turnbox{text-align:center;min-width:64px}
+  #turnlabel{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+  #turnnum{font-size:20px;line-height:1.1;color:var(--ink)}
+  #mute{background:none;border:none;color:var(--ink-dim);font-size:16px;cursor:pointer;padding:2px}
+
+  /* ---------- board ---------- */
+  #board{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center}
+  canvas{touch-action:none;image-rendering:auto;border-radius:8px}
+
+  /* ---------- log ---------- */
+  #log{height:20px;font-size:12px;color:var(--ink-dim);text-align:center;padding:2px 4px;
+       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+  #log b{color:var(--gold);font-style:normal}
+
+  /* ---------- command bar ---------- */
+  footer{display:flex;gap:8px;align-items:stretch;padding-top:6px}
+  #unitcard{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;
+            padding:6px 10px;display:flex;align-items:center;gap:10px}
+  #unitcard .face{font-size:26px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
+  #unitcard .meta{min-width:0}
+  #unitcard .nm{font-size:13px;font-weight:600;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #unitcard .st{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--ink-dim);font-variant-numeric:tabular-nums}
+  #unitcard .st b{color:var(--gold);font-weight:600}
+  button.cmd{
+    font-family:inherit;background:var(--panel-2);color:var(--ink);border:1px solid var(--line);
+    border-radius:8px;font-size:13px;font-weight:600;letter-spacing:.05em;padding:0 14px;min-height:52px;
+    cursor:pointer;transition:transform .06s,border-color .15s;
+  }
+  button.cmd:active{transform:scale(.96);border-color:var(--gold)}
+  button.cmd .big{display:block;font-size:19px;line-height:1.2}
+  #btnend{color:var(--gold-hi)}
+
+  /* ---------- overlays ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(10,8,20,.82);backdrop-filter:blur(3px);
+           display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+  .overlay.hidden{display:none}
+  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:12px;max-width:420px;width:100%;
+         max-height:86dvh;overflow-y:auto;padding:18px 18px 16px;box-shadow:0 18px 60px rgba(0,0,0,.6)}
+  .sheet h2{font-size:15px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:4px}
+  .sheet h3{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin:14px 0 6px;
+            border-bottom:1px solid var(--line);padding-bottom:4px}
+  .srow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--panel-2);
+        border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;color:var(--ink);
+        font-family:inherit;font-size:13px;cursor:pointer}
+  .srow:active{border-color:var(--gold)}
+  .srow[disabled]{opacity:.38;cursor:default}
+  .srow .ic{font-size:22px;width:28px;text-align:center}
+  .srow .inf{flex:1;min-width:0}
+  .srow .inf small{display:block;color:var(--ink-dim);font-size:11px;line-height:1.35}
+  .srow .cost{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--mana);white-space:nowrap}
+  .sheet .close{display:block;margin:10px auto 0;background:none;border:none;color:var(--ink-dim);
+                font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;padding:6px}
+
+  /* ---------- title & end screens ---------- */
+  .title-card{text-align:center}
+  .title-card .rune{font-size:44px;margin-bottom:6px}
+  .title-card h1{font-size:30px;line-height:1.05;letter-spacing:.06em;color:var(--gold-hi);
+                 font-weight:600;text-wrap:balance;font-variant:small-caps}
+  .title-card .sub{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-dim);margin:8px 0 14px}
+  .title-card p.blurb{font-size:13px;line-height:1.55;color:var(--ink);max-width:34ch;margin:0 auto 14px;text-align:center}
+  .howto{text-align:left;font-size:12px;line-height:1.6;color:var(--ink-dim);background:var(--panel-2);
+         border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:16px}
+  .howto b{color:var(--ink)}
+  .bigbtn{font-family:inherit;background:linear-gradient(180deg,#8a6a20,#6e5316);color:#fff3d6;border:1px solid var(--gold);
+          border-radius:10px;font-size:15px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+          padding:14px 34px;cursor:pointer;box-shadow:0 4px 18px rgba(214,169,68,.25)}
+  .bigbtn:active{transform:scale(.97)}
+  #endtitle.win{color:var(--good)} #endtitle.lose{color:var(--bad)}
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+</style>
+
+<div id="app">
+  <header>
+    <div class="vitals you">
+      <div class="who"><b>You</b><span>🧙</span></div>
+      <div class="bar hp"><i id="p1hp"></i></div>
+      <div class="bar mp"><i id="p1mp"></i></div>
+      <div class="nums"><span id="p1hpn">18</span><span id="p1mpn">12⬡</span></div>
+    </div>
+    <div id="turnbox" class="serif">
+      <div id="turnlabel">Turn</div>
+      <div id="turnnum">1</div>
+      <button id="mute" aria-label="Toggle sound">🔊</button>
+    </div>
+    <div class="vitals foe">
+      <div class="who"><span>🧛</span><b>Foe</b></div>
+      <div class="bar hp"><i id="p2hp"></i></div>
+      <div class="bar mp"><i id="p2mp"></i></div>
+      <div class="nums"><span id="p2hpn">18</span><span id="p2mpn">12⬡</span></div>
+    </div>
+  </header>
+
+  <div id="board"><canvas id="cv"></canvas></div>
+  <div id="log">The wizards face each other across the vale…</div>
+
+  <footer>
+    <div id="unitcard">
+      <div class="face" id="ucFace">🧙</div>
+      <div class="meta">
+        <div class="nm" id="ucName">Tap a unit</div>
+        <div class="st" id="ucStats">Select one of your creatures</div>
+      </div>
+    </div>
+    <button class="cmd" id="btnspells"><span class="big">📖</span>Spells</button>
+    <button class="cmd" id="btnend"><span class="big">⌛</span>End&nbsp;Turn</button>
+  </footer>
+</div>
+
+<!-- spellbook -->
+<div class="overlay hidden" id="bookOv">
+  <div class="sheet">
+    <h2 class="serif">Grimoire</h2>
+    <h3>Sorcery</h3>
+    <div id="spellList"></div>
+    <h3>Summoning</h3>
+    <div id="summonList"></div>
+    <button class="close" id="bookClose">Close</button>
+  </div>
+</div>
+
+<!-- title screen -->
+<div class="overlay" id="titleOv">
+  <div class="sheet title-card">
+    <div class="rune">🧙⚔️🧛</div>
+    <h1 class="serif">Lords of Chaos</h1>
+    <div class="sub">A Wizard's Duel</div>
+    <p class="blurb serif">Two sorcerers meet in a moonlit vale. Only one will walk away. Summon your host, hurl your fire, and strike down the rival wizard.</p>
+    <div class="howto">
+      <b>Tap a unit</b> to select it, then tap a glowing tile to move — or tap a foe beside it to strike.<br>
+      <b>📖 Spells</b> opens your grimoire: bolts, fire, healing and summoned beasts. Casting costs mana ⬡ and action points.<br>
+      <b>⌛ End Turn</b> passes to the enemy wizard. Mana returns each turn.<br>
+      Slay the <b>enemy wizard</b> to win. Guard your own with your life.
+    </div>
+    <button class="bigbtn" id="btnstart">Begin the Duel</button>
+  </div>
+</div>
+
+<!-- end screen -->
+<div class="overlay hidden" id="endOv">
+  <div class="sheet title-card">
+    <div class="rune" id="endRune">🏆</div>
+    <h1 class="serif" id="endtitle">Victory</h1>
+    <p class="blurb serif" id="endblurb"></p>
+    <button class="bigbtn" id="btnagain">Duel Again</button>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+/* ============================== data ============================== */
+const GW = 11, GH = 15;
+const T = { GRASS:0, TREE:1, WATER:2, ROCK:3 };
+
+const WIZ = { id:'wizard', name:'Wizard', e:'🧙', hp:18, atk:3, def:2, ap:5 };
+const CREATURES = [
+  { id:'goblin',  name:'Goblin',       e:'👺', cost:3,  hp:4,  atk:2, def:1, ap:4,          d:'Cheap, expendable, mean.' },
+  { id:'wolf',    name:'Wolf',         e:'🐺', cost:4,  hp:5,  atk:3, def:1, ap:7,          d:'Fast — runs down fleeing prey.' },
+  { id:'skeleton',name:'Skeleton',     e:'💀', cost:4,  hp:5,  atk:3, def:2, ap:4,          d:'Sturdy bones, steady blade.' },
+  { id:'spider',  name:'Giant Spider', e:'🕷️', cost:5,  hp:6,  atk:3, def:2, ap:5,          d:'Skittering horror of the woods.' },
+  { id:'eagle',   name:'Eagle',        e:'🦅', cost:5,  hp:4,  atk:3, def:1, ap:8, fly:1,   d:'Flies over water and trees.' },
+  { id:'orc',     name:'Orc',          e:'👹', cost:6,  hp:8,  atk:4, def:2, ap:4,          d:'A brutish wall of muscle.' },
+  { id:'golem',   name:'Golem',        e:'🗿', cost:9,  hp:13, atk:5, def:4, ap:3,          d:'Slow, but nearly unbreakable.' },
+  { id:'dragon',  name:'Dragon',       e:'🐉', cost:13, hp:14, atk:6, def:3, ap:5, fly:1, rng:3, ratk:4, d:'Flies, and breathes fire (range 3).' },
+];
+const SPELLS = [
+  { id:'bolt',     name:'Magic Bolt', e:'⚡', cost:3, range:6, dmg:3,  d:'3 damage to a foe, range 6.' },
+  { id:'fireball', name:'Fireball',   e:'🔥', cost:6, range:5, dmg:5,  d:'5 damage to a foe, range 5.' },
+  { id:'heal',     name:'Heal',       e:'✨', cost:4, range:4, heal:6, d:'Restore 6 health to an ally.' },
+  { id:'teleport', name:'Teleport',   e:'🌀', cost:5, range:5,         d:'Whisk yourself to a tile within 5.' },
+];
+const MANA_START = 12, MANA_REGEN = 3, MANA_CAP = 25, CAST_AP = 2, MELEE_AP = 2, BREATH_AP = 3;
+
+/* ============================== state ============================== */
+let grid, units, turn, state, sel, moveMap, castMode, floaters, log2;
+let p1mana, p2mana, aiPhase, muted = false;
+
+const $ = id => document.getElementById(id);
+const cv = $('cv'), ctx = cv.getContext('2d');
+const ri = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const cheb = (a,b,c,d) => Math.max(Math.abs(a-c), Math.abs(b-d));
+const inb = (x,y) => x>=0 && x<GW && y>=0 && y<GH;
+const unitAt = (x,y) => units.find(u => u.x===x && u.y===y);
+const wiz = side => units.find(u => u.side===side && u.kind.id==='wizard');
+const glyph = u => (u.kind.id==='wizard' && u.side===1) ? '🧛' : u.kind.e;
+const passable = (t,fly) => fly ? t!==T.ROCK : (t===T.GRASS || t===T.TREE);
+
+function makeUnit(side, kind, x, y){
+  return { side, kind, x, y, hp:kind.hp, ap:kind.ap };
+}
+
+function genMap(){
+  grid = Array.from({length:GH}, () => Array(GW).fill(T.GRASS));
+  // water pools
+  for (let i=0;i<3;i++){
+    const cx = ri(1,GW-2), cy = ri(3,GH-4);
+    for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++)
+      if (inb(cx+dx,cy+dy) && Math.random()<0.65) grid[cy+dy][cx+dx] = T.WATER;
+  }
+  // trees & rocks
+  for (let y=0;y<GH;y++) for (let x=0;x<GW;x++){
+    if (grid[y][x]!==T.GRASS) continue;
+    const r = Math.random();
+    if (r<0.11) grid[y][x]=T.TREE; else if (r<0.145) grid[y][x]=T.ROCK;
+  }
+  // clear spawn zones
+  for (const sy of [1, GH-2])
+    for (let dy=-1;dy<=1;dy++) for (let dx=-2;dx<=2;dx++)
+      if (inb(5+dx, sy+dy)) grid[sy+dy][5+dx] = T.GRASS;
+}
+
+function newGame(){
+  genMap();
+  units = [ makeUnit(0, WIZ, 5, GH-2), makeUnit(1, WIZ, 5, 1) ];
+  turn = 1; state = 'player'; sel = null; moveMap = null; castMode = null;
+  floaters = []; p1mana = MANA_START; p2mana = MANA_START; aiPhase = null;
+  setLog('Your move. Tap your wizard, open the <b>grimoire</b>, and begin.');
+  refreshHud(); refreshCard();
+}
+
+/* ============================== pathing ============================== */
+function bfsMove(u){
+  // dist map of reachable tiles within u.ap; units block, terrain per creature
+  const dist = Array.from({length:GH}, () => Array(GW).fill(Infinity));
+  dist[u.y][u.x] = 0;
+  const q = [[u.x,u.y]];
+  while (q.length){
+    const [x,y] = q.shift(), d = dist[y][x];
+    if (d >= u.ap) continue;
+    for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){
+      if (!dx && !dy) continue;
+      const nx=x+dx, ny=y+dy;
+      if (!inb(nx,ny) || dist[ny][nx] <= d+1) continue;
+      if (!passable(grid[ny][nx], u.kind.fly) || unitAt(nx,ny)) continue;
+      dist[ny][nx] = d+1; q.push([nx,ny]);
+    }
+  }
+  // flyers may pass over water but not stop on it
+  if (u.kind.fly) for (let y=0;y<GH;y++) for (let x=0;x<GW;x++)
+    if (grid[y][x]===T.WATER) dist[y][x] = Infinity;
+  dist[u.y][u.x] = Infinity; // can't "move" to self
+  return dist;
+}
+function meleeTargets(u){
+  if (u.ap < MELEE_AP) return [];
+  return units.filter(v => v.side!==u.side && cheb(u.x,u.y,v.x,v.y)===1);
+}
+function breathTargets(u){
+  if (!u.kind.rng || u.ap < BREATH_AP) return [];
+  return units.filter(v => v.side!==u.side && cheb(u.x,u.y,v.x,v.y) <= u.kind.rng);
+}
+
+/* ============================== combat ============================== */
+function terrainDef(u){ return grid[u.y][u.x]===T.TREE ? 1 : 0; }
+function dealDamage(att, def, amount, verb){
+  const dmg = Math.max(1, amount + ri(0,2) - Math.floor(def.kind.def/2) - terrainDef(def));
+  def.hp -= dmg;
+  addFloater(def.x, def.y, `−${dmg}`, '#ff8a7a');
+  setLog(`${att.side===0?'Your':'Enemy'} <b>${att.kind.name}</b> ${verb} the ${def.side===0?'friendly ':''}${def.kind.name} for ${dmg}.`);
+  snd('hit');
+  if (def.hp <= 0) killUnit(def);
+  refreshHud();
+}
+function killUnit(u){
+  units = units.filter(v => v !== u);
+  addFloater(u.x, u.y, '☠', '#e9e2cf');
+  snd('death');
+  if (u.kind.id === 'wizard') endGame(u.side === 1);
+  if (sel === u){ sel = null; moveMap = null; refreshCard(); }
+}
+function endGame(won){
+  state = 'over';
+  $('endRune').textContent = won ? '🏆' : '🪦';
+  const t = $('endtitle');
+  t.textContent = won ? 'Victory' : 'Defeat';
+  t.className = won ? 'serif win' : 'serif lose';
+  $('endblurb').textContent = won
+    ? 'The rival wizard falls, and their creatures crumble to dust. The vale is yours, Lord of Chaos.'
+    : 'Your staff clatters to the grass. The vale falls silent under the enemy’s banner. Duel again?';
+  snd(won ? 'win' : 'lose');
+  setTimeout(() => $('endOv').classList.remove('hidden'), 700);
+}
+
+/* ============================== spells ============================== */
+function castTiles(spell, caster){
+  const out = [];
+  const each = f => { for (let y=0;y<GH;y++) for (let x=0;x<GW;x++) f(x,y); };
+  if (spell.summon){
+    each((x,y) => {
+      if (cheb(caster.x,caster.y,x,y)===1 && !unitAt(x,y) &&
+          (grid[y][x]===T.GRASS || grid[y][x]===T.TREE)) out.push([x,y]);
+    });
+  } else if (spell.id==='teleport'){
+    each((x,y) => {
+      const d = cheb(caster.x,caster.y,x,y);
+      if (d>=1 && d<=spell.range && !unitAt(x,y) &&
+          (grid[y][x]===T.GRASS || grid[y][x]===T.TREE)) out.push([x,y]);
+    });
+  } else if (spell.heal){
+    for (const v of units)
+      if (v.side===caster.side && v.hp < v.kind.hp && cheb(caster.x,caster.y,v.x,v.y)<=spell.range)
+        out.push([v.x,v.y]);
+  } else {
+    for (const v of units)
+      if (v.side!==caster.side && cheb(caster.x,caster.y,v.x,v.y)<=spell.range)
+        out.push([v.x,v.y]);
+  }
+  return out;
+}
+function doCast(spell, caster, x, y){
+  if (caster.side===0) p1mana -= spell.cost; else p2mana -= spell.cost;
+  caster.ap -= CAST_AP;
+  snd('cast');
+  if (spell.summon){
+    const c = makeUnit(caster.side, spell.summon, x, y);
+    c.ap = 0; // arrives dazed; acts next turn
+    units.push(c);
+    addFloater(x, y, spell.summon.e, '#9d86ff');
+    setLog(`${caster.side===0?'You summon':'The enemy summons'} a <b>${spell.summon.name}</b>!`);
+  } else if (spell.id==='teleport'){
+    addFloater(caster.x, caster.y, '🌀', '#9d86ff');
+    caster.x = x; caster.y = y;
+    setLog(`${caster.side===0?'Your':'The enemy'} wizard blinks across the field.`);
+  } else if (spell.heal){
+    const v = unitAt(x,y);
+    if (v){ v.hp = Math.min(v.kind.hp, v.hp + spell.heal);
+      addFloater(x,y,`+${spell.heal}`, '#7fd68a');
+      setLog(`<b>${spell.name}</b> mends the ${v.kind.name}.`); }
+  } else {
+    const v = unitAt(x,y);
+    if (v){
+      const dmg = Math.max(1, spell.dmg + ri(0,1) - Math.floor(v.kind.def/2));
+      v.hp -= dmg;
+      addFloater(x,y,`−${dmg}`, spell.id==='fireball' ? '#ffb35e' : '#8fd0ff');
+      setLog(`<b>${spell.name}</b> sears the ${v.side===0?'friendly ':''}${v.kind.name} for ${dmg}.`);
+      if (v.hp<=0) killUnit(v);
+    }
+  }
+  refreshHud(); refreshCard();
+}
+
+/* ============================== player input ============================== */
+function selectUnit(u){
+  sel = u; castMode = null;
+  moveMap = (u && u.side===0 && state==='player') ? bfsMove(u) : null;
+  refreshCard();
+}
+function tileTapped(x, y){
+  if (state !== 'player') return;
+  const u = unitAt(x,y);
+  if (castMode){
+    if (castMode.tiles.some(([tx,ty]) => tx===x && ty===y)){
+      doCast(castMode.spell, wiz(0), x, y);
+      castMode = null; if (sel) moveMap = sel.side===0 ? bfsMove(sel) : null;
+    } else { castMode = null; setLog('Casting cancelled.'); }
+    refreshCard(); return;
+  }
+  if (u && u.side===0){ selectUnit(u); snd('tap'); return; }
+  if (sel && sel.side===0){
+    if (u && u.side===1){
+      if (sel.ap>=MELEE_AP && cheb(sel.x,sel.y,u.x,u.y)===1){
+        sel.ap -= MELEE_AP; dealDamage(sel, u, sel.kind.atk, 'strikes');
+        moveMap = bfsMove(sel); refreshCard(); return;
+      }
+      if (sel.kind.rng && sel.ap>=BREATH_AP && cheb(sel.x,sel.y,u.x,u.y)<=sel.kind.rng){
+        sel.ap -= BREATH_AP; dealDamage(sel, u, sel.kind.ratk, 'breathes fire on');
+        moveMap = bfsMove(sel); refreshCard(); return;
+      }
+    }
+    if (moveMap && moveMap[y][x] <= sel.ap){
+      sel.ap -= moveMap[y][x]; sel.x = x; sel.y = y; snd('move');
+      moveMap = bfsMove(sel); refreshCard(); return;
+    }
+  }
+  if (u){ sel = u; moveMap = null; refreshCard(); return; } // inspect enemy
+  selectUnit(null);
+}
+function endTurn(){
+  if (state !== 'player') return;
+  sel = null; moveMap = null; castMode = null; refreshCard();
+  state = 'ai';
+  p2mana = Math.min(MANA_CAP, p2mana + MANA_REGEN);
+  for (const u of units) if (u.side===1) u.ap = u.kind.ap;
+  aiPhase = { idx:0, wizSteps:0, summons:0 };
+  setLog('The enemy wizard is acting…');
+  refreshHud();
+  setTimeout(aiTick, 380);
+}
+
+/* ============================== enemy AI ============================== */
+function aiUnits(){ return units.filter(u => u.side===1); }
+function nearestFoe(u, preferWiz){
+  let best = null, bd = 1e9;
+  for (const v of units) if (v.side===0){
+    let d = cheb(u.x,u.y,v.x,v.y);
+    if (preferWiz && v.kind.id==='wizard') d -= 2;
+    if (d < bd){ bd = d; best = v; }
+  }
+  return best;
+}
+function stepToward(u, tx, ty){
+  // pick passable neighbour that most reduces chebyshev distance
+  let best = null, bd = cheb(u.x,u.y,tx,ty);
+  for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){
+    if (!dx && !dy) continue;
+    const nx=u.x+dx, ny=u.y+dy;
+    if (!inb(nx,ny) || unitAt(nx,ny)) continue;
+    if (u.kind.fly ? grid[ny][nx]!==T.GRASS && grid[ny][nx]!==T.TREE : !passable(grid[ny][nx], 0)) continue;
+    const d = cheb(nx,ny,tx,ty) + Math.random()*0.3;
+    if (d < bd){ bd = d; best = [nx,ny]; }
+  }
+  return best;
+}
+function stepAway(u, tx, ty){
+  let best = null, bd = cheb(u.x,u.y,tx,ty);
+  for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){
+    if (!dx && !dy) continue;
+    const nx=u.x+dx, ny=u.y+dy;
+    if (!inb(nx,ny) || unitAt(nx,ny) || !passable(grid[ny][nx], u.kind.fly)) continue;
+    if (u.kind.fly && grid[ny][nx]===T.WATER) continue;
+    const d = cheb(nx,ny,tx,ty);
+    if (d > bd){ bd = d; best = [nx,ny]; }
+  }
+  return best;
+}
+function aiWizardAct(w){
+  const pw = wiz(0);
+  if (!pw) return false;
+  const heal = SPELLS.find(s=>s.id==='heal'), bolt = SPELLS.find(s=>s.id==='bolt'),
+        fire = SPELLS.find(s=>s.id==='fireball');
+  if (w.ap >= CAST_AP){
+    // 1. heal self when hurt
+    if (w.hp <= 9 && p2mana >= heal.cost){ doCast(heal, w, w.x, w.y); return true; }
+    // 2. blast: prefer fireball on wizard, else bolt weakest in range
+    const inR = s => units.filter(v => v.side===0 && cheb(w.x,w.y,v.x,v.y) <= s.range);
+    if (p2mana >= fire.cost){
+      const ts = inR(fire);
+      if (ts.length){
+        const t = ts.find(v=>v.kind.id==='wizard') || ts.sort((a,b)=>a.hp-b.hp)[0];
+        doCast(fire, w, t.x, t.y); return true;
+      }
+    }
+    if (p2mana >= bolt.cost){
+      const ts = inR(bolt);
+      if (ts.length){
+        const t = ts.find(v=>v.kind.id==='wizard' && v.hp<=6) || ts.sort((a,b)=>a.hp-b.hp)[0];
+        doCast(bolt, w, t.x, t.y); return true;
+      }
+    }
+    // 3. summon while army is small
+    const army = aiUnits().length - 1;
+    if (army < 5 && aiPhase.summons < 2){
+      const affordable = CREATURES.filter(c => c.cost <= p2mana);
+      if (affordable.length){
+        const pick = affordable[Math.max(0, affordable.length - 1 - ri(0,1))];
+        const spots = castTiles({summon:pick}, w)
+          .sort((a,b)=>cheb(a[0],a[1],pw.x,pw.y)-cheb(b[0],b[1],pw.x,pw.y));
+        if (spots.length){
+          aiPhase.summons++;
+          doCast({...pick, summon:pick, cost:pick.cost, name:pick.name}, w, spots[0][0], spots[0][1]);
+          return true;
+        }
+      }
+    }
+  }
+  // 4. keep distance from nearest threat
+  const foe = nearestFoe(w, false);
+  if (foe && cheb(w.x,w.y,foe.x,foe.y) <= 3 && w.ap >= 1){
+    const s = stepAway(w, foe.x, foe.y);
+    if (s){ w.x=s[0]; w.y=s[1]; w.ap--; return true; }
+  }
+  return false;
+}
+function aiCreatureAct(u){
+  // melee if adjacent
+  if (u.ap >= MELEE_AP){
+    const adj = units.filter(v => v.side===0 && cheb(u.x,u.y,v.x,v.y)===1)
+      .sort((a,b)=>(a.kind.id==='wizard'?-99:a.hp)-(b.kind.id==='wizard'?-99:b.hp));
+    if (adj.length){ u.ap -= MELEE_AP; dealDamage(u, adj[0], u.kind.atk, 'savages'); return true; }
+  }
+  // dragon breath
+  if (u.kind.rng && u.ap >= BREATH_AP){
+    const ts = units.filter(v => v.side===0 && cheb(u.x,u.y,v.x,v.y) <= u.kind.rng);
+    if (ts.length){
+      const t = ts.find(v=>v.kind.id==='wizard') || ts.sort((a,b)=>a.hp-b.hp)[0];
+      u.ap -= BREATH_AP; dealDamage(u, t, u.kind.ratk, 'breathes fire on'); return true;
+    }
+  }
+  // advance
+  if (u.ap >= 1){
+    const foe = nearestFoe(u, true);
+    if (foe){
+      const s = stepToward(u, foe.x, foe.y);
+      if (s){ u.x=s[0]; u.y=s[1]; u.ap--; return true; }
+    }
+  }
+  return false;
+}
+function aiTick(){
+  if (state !== 'ai') return;
+  const list = aiUnits();
+  if (aiPhase.idx >= list.length){ finishAiTurn(); return; }
+  const u = list[aiPhase.idx];
+  const acted = u.kind.id==='wizard' ? aiWizardAct(u) : aiCreatureAct(u);
+  if (!acted) aiPhase.idx++;
+  if (state === 'ai') setTimeout(aiTick, acted ? 170 : 30);
+}
+function finishAiTurn(){
+  if (state !== 'ai') return;
+  state = 'player'; turn++;
+  p1mana = Math.min(MANA_CAP, p1mana + MANA_REGEN);
+  for (const u of units) if (u.side===0) u.ap = u.kind.ap;
+  setLog(`Turn ${turn} — your move.`);
+  refreshHud(); refreshCard();
+}
+
+/* ============================== hud / ui ============================== */
+function setLog(html){ $('log').innerHTML = html; }
+function refreshHud(){
+  const w1 = wiz(0), w2 = wiz(1);
+  $('p1hp').style.width = w1 ? (100*w1.hp/WIZ.hp)+'%' : '0%';
+  $('p2hp').style.width = w2 ? (100*w2.hp/WIZ.hp)+'%' : '0%';
+  $('p1mp').style.width = (100*p1mana/MANA_CAP)+'%';
+  $('p2mp').style.width = (100*p2mana/MANA_CAP)+'%';
+  $('p1hpn').textContent = (w1?w1.hp:0)+' hp';
+  $('p2hpn').textContent = (w2?w2.hp:0)+' hp';
+  $('p1mpn').textContent = p1mana+'⬡';
+  $('p2mpn').textContent = p2mana+'⬡';
+  $('turnnum').textContent = turn;
+  $('turnlabel').textContent = state==='ai' ? 'Foe…' : 'Turn';
+}
+function refreshCard(){
+  const f = $('ucFace'), n = $('ucName'), s = $('ucStats');
+  if (!sel){ f.textContent = '🧭'; n.textContent = 'No unit selected';
+    s.textContent = 'Tap one of your creatures'; return; }
+  f.textContent = glyph(sel);
+  n.textContent = (sel.side===0?'':'Enemy ') + sel.kind.name;
+  s.innerHTML = `HP ${sel.hp}/${sel.kind.hp} · ATK ${sel.kind.atk} · DEF ${sel.kind.def} · <b>AP ${sel.ap}</b>`;
+}
+
+/* spellbook */
+function buildBook(){
+  const w = wiz(0);
+  const canAct = w && state==='player' && w.ap >= CAST_AP;
+  const mk = (parent, icon, title, sub, cost, enabled, fn) => {
+    const b = document.createElement('button');
+    b.className = 'srow';
+    b.innerHTML = `<span class="ic">${icon}</span><span class="inf">${title}<small>${sub}</small></span><span class="cost">${cost}⬡</span>`;
+    if (!enabled) b.disabled = true; else b.onclick = fn;
+    parent.appendChild(b);
+  };
+  const sl = $('spellList'), su = $('summonList');
+  sl.innerHTML = ''; su.innerHTML = '';
+  for (const s of SPELLS)
+    mk(sl, s.e, s.name, s.d, s.cost, canAct && p1mana >= s.cost, () => armCast(s));
+  for (const c of CREATURES)
+    mk(su, c.e, c.name, `${c.d} HP ${c.hp} · ATK ${c.atk} · AP ${c.ap}`, c.cost,
+       canAct && p1mana >= c.cost, () => armCast({ id:'summon-'+c.id, name:'Summon '+c.name, cost:c.cost, summon:c }));
+}
+function armCast(spell){
+  $('bookOv').classList.add('hidden');
+  const w = wiz(0);
+  const tiles = castTiles(spell, w);
+  if (!tiles.length){ setLog(`No valid target for <b>${spell.name}</b>.`); return; }
+  sel = w; moveMap = null;
+  castMode = { spell, tiles };
+  setLog(`<b>${spell.name}</b> — tap a glowing tile to cast.`);
+  refreshCard(); snd('tap');
+}
+
+/* ============================== render ============================== */
+let tile = 24, ox = 0, oy = 0;
+function layout(){
+  const box = $('board');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  const w = box.clientWidth, h = box.clientHeight;
+  tile = Math.floor(Math.min(w / GW, h / GH));
+  const cw = tile * GW, chh = tile * GH;
+  cv.width = cw * dpr; cv.height = chh * dpr;
+  cv.style.width = cw + 'px'; cv.style.height = chh + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function addFloater(x, y, text, color){
+  floaters.push({ x, y, text, color, t:0 });
+}
+const TCOL = { [T.GRASS]:['#232f22','#273526'], [T.TREE]:['#1f2c1f','#233123'],
+               [T.WATER]:['#16283e','#182c44'], [T.ROCK]:['#2b2833','#2f2c38'] };
+function draw(ts){
+  requestAnimationFrame(draw);
+  if (!grid) return;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const em = f => { ctx.font = `${Math.floor(tile*f)}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; };
+  // terrain
+  for (let y=0;y<GH;y++) for (let x=0;x<GW;x++){
+    const t = grid[y][x];
+    ctx.fillStyle = TCOL[t][(x+y)%2];
+    ctx.fillRect(x*tile, y*tile, tile, tile);
+    if (t===T.WATER){
+      ctx.fillStyle = 'rgba(120,180,255,'+(0.05+0.03*Math.sin(ts/700 + x + y))+')';
+      ctx.fillRect(x*tile, y*tile, tile, tile);
+    }
+    if (t===T.TREE){ em(0.62); ctx.fillText('🌲', (x+0.5)*tile, (y+0.55)*tile); }
+    if (t===T.ROCK){ em(0.58); ctx.fillText('🪨', (x+0.5)*tile, (y+0.55)*tile); }
+  }
+  // grid lines
+  ctx.strokeStyle = 'rgba(233,226,207,0.045)'; ctx.lineWidth = 1;
+  for (let x=0;x<=GW;x++){ ctx.beginPath(); ctx.moveTo(x*tile,0); ctx.lineTo(x*tile,GH*tile); ctx.stroke(); }
+  for (let y=0;y<=GH;y++){ ctx.beginPath(); ctx.moveTo(0,y*tile); ctx.lineTo(GW*tile,y*tile); ctx.stroke(); }
+  // move highlights
+  if (state==='player' && sel && moveMap && !castMode){
+    ctx.fillStyle = 'rgba(214,169,68,0.20)';
+    for (let y=0;y<GH;y++) for (let x=0;x<GW;x++)
+      if (moveMap[y][x] <= sel.ap) ctx.fillRect(x*tile+2, y*tile+2, tile-4, tile-4);
+    for (const v of [...meleeTargets(sel), ...breathTargets(sel)]){
+      ctx.strokeStyle = 'rgba(255,107,94,0.9)'; ctx.lineWidth = 2;
+      ctx.strokeRect(v.x*tile+2.5, v.y*tile+2.5, tile-5, tile-5);
+    }
+  }
+  // cast highlights
+  if (castMode){
+    const pulse = 0.22 + 0.10*Math.sin(ts/220);
+    ctx.fillStyle = `rgba(157,134,255,${pulse})`;
+    for (const [x,y] of castMode.tiles) ctx.fillRect(x*tile+2, y*tile+2, tile-4, tile-4);
+  }
+  // units
+  for (const u of units){
+    const cx = (u.x+0.5)*tile, cyy = (u.y+0.52)*tile;
+    ctx.beginPath(); ctx.arc(cx, (u.y+0.62)*tile, tile*0.36, 0, 7);
+    ctx.fillStyle = u.side===0 ? 'rgba(109,178,255,0.22)' : 'rgba(255,107,94,0.22)';
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = u.side===0 ? 'rgba(109,178,255,0.75)' : 'rgba(255,107,94,0.75)';
+    ctx.stroke();
+    if (u === sel){
+      ctx.beginPath(); ctx.arc(cx, (u.y+0.62)*tile, tile*0.44 + Math.sin(ts/180), 0, 7);
+      ctx.strokeStyle = '#f0c96a'; ctx.lineWidth = 2; ctx.stroke();
+    }
+    em(0.66); ctx.fillText(glyph(u), cx, cyy);
+    // hp bar
+    const bw = tile*0.64, bx = cx - bw/2, by = (u.y+0.92)*tile;
+    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(bx, by, bw, 3);
+    ctx.fillStyle = u.hp/u.kind.hp > 0.4 ? '#7fd68a' : '#ff8a7a';
+    ctx.fillRect(bx, by, bw * Math.max(0,u.hp/u.kind.hp), 3);
+  }
+  // floaters
+  for (const f of floaters){
+    f.t += 1/60;
+    ctx.globalAlpha = Math.max(0, 1 - f.t/1.1);
+    ctx.fillStyle = f.color;
+    ctx.font = `bold ${Math.floor(tile*0.42)}px system-ui, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(f.text, (f.x+0.5)*tile, (f.y+0.25)*tile - f.t*tile*0.7);
+    ctx.globalAlpha = 1;
+  }
+  floaters = floaters.filter(f => f.t < 1.1);
+}
+
+/* ============================== sound ============================== */
+let AC = null;
+function snd(kind){
+  if (muted) return;
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    const t0 = AC.currentTime;
+    const play = (f, dur, type, vol, dt=0) => {
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t0+dt);
+      g.gain.setValueAtTime(vol, t0+dt);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+dt+dur);
+      o.connect(g); g.connect(AC.destination);
+      o.start(t0+dt); o.stop(t0+dt+dur+0.02);
+    };
+    if (kind==='tap')   play(520, .05, 'sine', .03);
+    if (kind==='move')  play(300, .06, 'triangle', .04);
+    if (kind==='hit'){  play(130, .09, 'square', .05); play(90, .12, 'square', .04, .04); }
+    if (kind==='cast'){ play(620, .10, 'sine', .05); play(930, .14, 'sine', .04, .07); }
+    if (kind==='death') play(75, .35, 'sawtooth', .05);
+    if (kind==='win'){  [523,659,784,1046].forEach((f,i)=>play(f,.22,'triangle',.05,i*.13)); }
+    if (kind==='lose'){ [392,311,262,196].forEach((f,i)=>play(f,.25,'sawtooth',.04,i*.16)); }
+  }catch(e){/* audio unavailable */}
+}
+
+/* ============================== wiring ============================== */
+cv.addEventListener('pointerdown', ev => {
+  const r = cv.getBoundingClientRect();
+  const x = Math.floor((ev.clientX - r.left) / tile);
+  const y = Math.floor((ev.clientY - r.top) / tile);
+  if (inb(x,y)) tileTapped(x,y);
+});
+$('btnend').addEventListener('click', () => { snd('tap'); endTurn(); });
+$('btnspells').addEventListener('click', () => {
+  if (state!=='player') return;
+  buildBook(); $('bookOv').classList.remove('hidden'); snd('tap');
+});
+$('bookClose').addEventListener('click', () => $('bookOv').classList.add('hidden'));
+$('bookOv').addEventListener('click', ev => { if (ev.target === $('bookOv')) $('bookOv').classList.add('hidden'); });
+$('btnstart').addEventListener('click', () => {
+  $('titleOv').classList.add('hidden'); newGame(); snd('cast');
+});
+$('btnagain').addEventListener('click', () => {
+  $('endOv').classList.add('hidden'); newGame(); snd('cast');
+});
+$('mute').addEventListener('click', () => {
+  muted = !muted; $('mute').textContent = muted ? '🔇' : '🔊';
+});
+window.addEventListener('resize', layout);
+
+layout();
+newGame();          // world visible behind the title screen
+state = 'title';
+requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>

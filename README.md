@@ -1,5 +1,11 @@
 # Korean Ramen Guide - Netlify Deployment
 
+> **Bonus:** this repo also contains **Lords of Chaos — Wizard Duel**, a mobile-friendly
+> turn-based wizard battle game inspired by Julian Gollop's 1990 classic.
+> It lives at [`lords-of-chaos/index.html`](lords-of-chaos/index.html) — a single
+> self-contained file with no dependencies. If deployed to Netlify along with the
+> site, it's playable at `/lords-of-chaos/` on any phone browser.
+
 A two-page affiliate marketing site for Korean ramen seasoning ingredients and recipe guide.
 
 ## 📁 Files Included
